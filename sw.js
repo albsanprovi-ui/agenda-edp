@@ -1,12 +1,9 @@
-const CACHE_NAME = 'edp-agenda-v7';
+const CACHE_NAME = 'edp-agenda-v8';
 const ASSETS = [
-  './',
-  './index.html',
-  './original.html',
-  './logo.png',
-  './manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-  'https://cdn.jsdelivr.net/npm/chart.js'
+  'index.html',
+  'original.html',
+  'logo.png',
+  'manifest.json'
 ];
 
 self.addEventListener('install', (event) => {

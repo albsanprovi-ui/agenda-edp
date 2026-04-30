@@ -240,7 +240,7 @@ tr:hover td{background:#f8f9fb}
   <div class="topbar">
     <div class="tlogo">
       <div style="width:32px;height:32px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="logo.png" alt="EDP" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.style.background='#4dbb6e'"></div>
-      <div class="tlogo-text">MT · <span>Agenda Regional</span> <small style="font-size:9px;opacity:0.5;margin-left:5px">v1.2.2</small></div>
+      <div class="tlogo-text">MT · <span>Agenda Regional</span> <small style="font-size:9px;opacity:0.5;margin-left:5px">v1.2.3</small></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <button id="install-btn" class="btn btn-sm" style="display:none;background:#ffeb3b;color:#000;font-weight:bold;border:none;padding:5px 10px;border-radius:20px" onclick="installApp()">📥 Instalar App</button>
@@ -828,22 +828,18 @@ async function installApp(){if(deferredPrompt){deferredPrompt.prompt();const{out
 
 if ('serviceWorker' in navigator) {
   const st = document.getElementById('pwa-status');
-  if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-    if(st) st.innerHTML = '<span style="color:var(--er)">● Erro: Site não é HTTPS (Obrigatório para instalar)</span>';
-  } else {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => {
-          if(st) st.innerHTML = '<span style="color:var(--green)">● App Pronto para Instalar</span>';
-        })
-        .catch(err => {
-          if(st) st.innerHTML = '<span style="color:var(--er)">● Erro SW: ' + err.message + '</span>';
-        });
-    });
-  }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        if(st) st.innerHTML = '<span style="color:var(--green)">● App Pronto para Instalar</span>';
+      })
+      .catch(err => {
+        if(st) st.innerHTML = '<span style="color:var(--er)">● Erro SW: ' + err.message + '</span>';
+      });
+  });
 } else {
   const st = document.getElementById('pwa-status');
-  if(st) st.innerHTML = '<span style="color:var(--er)">● PWA não suportado (Use Chrome ou Safari)</span>';
+  if(st) st.innerHTML = '<span style="color:var(--er)">● PWA não suportado</span>';
 }
 </script>
 
