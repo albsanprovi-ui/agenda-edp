@@ -189,6 +189,34 @@ tr:hover td{background:#f8f9fb}
 .debug-box{background:#1a1a2e;color:#a0f0a0;border:1px solid #333;border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:11px;max-height:220px;overflow-y:auto;display:none}
 .debug-box.show{display:block}
 
+.af-heatmap-wrap { overflow-x: auto; margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+.af-heatmap { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+.af-heatmap th, .af-heatmap td { padding: 6px 2px; text-align: center; border: 1px solid var(--border); min-width: 28px; }
+.af-heatmap .day-hdr { background: #f8f9fb; font-weight: 700; font-size: 10px; height: 40px; }
+.af-heatmap .day-hdr.ws { background: #f1f5f9; color: #94a3b8; }
+.af-heatmap .day-hdr.fer { background: #fee2e2; color: #ef4444; }
+.af-heatmap .day-hdr.leit { background: #fef3c7; color: #d97706; }
+.af-heatmap .eq-cell { text-align: left; padding: 6px 10px; font-weight: 600; background: #f8f9fb; position: sticky; left: 0; z-index: 2; width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hcell { height: 32px; font-weight: 700; transition: transform 0.1s; }
+.hcell:hover { transform: scale(1.1); z-index: 5; position: relative; cursor: default; }
+.hcell.h0 { background: #f0fdf4; color: #166534; }
+.hcell.h1 { background: #fef9c3; color: #854d0e; }
+.hcell.h2 { background: #fde68a; color: #92400e; }
+.hcell.h3 { background: #fdba74; color: #9a3412; }
+.hcell.h4 { background: #fca5a5; color: #991b1b; }
+.hcell.ws { background: #f8fafc; color: #cbd5e1; font-weight: 400; }
+.hcell.fer { background: #fee2e2; color: #ef4444; font-size: 14px; }
+.hcell.leit { border: 2px solid #f59e0b; }
+.hcell.today { outline: 3px solid var(--blue); outline-offset: -3px; }
+.total-cell { font-weight: 800; background: #f8f9fb; position: sticky; right: 0; z-index: 2; width: 50px; }
+.af-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; padding: 10px; background: var(--bg); border-radius: 8px; }
+.af-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text2); }
+.af-legend-sq { width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.05); }
+.af-summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 15px; }
+.af-summary-card { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.af-summary-card .sv { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
+.af-summary-card .sl { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+
 @media(max-width:640px){
   .g2{grid-template-columns:1fr}
   .ns-status-grid{grid-template-columns:repeat(2,1fr)}
@@ -474,7 +502,7 @@ function startApp(){
   document.getElementById('btn-tab-equipes').style.display=currentUser.role==='programador'?'block':'none';
   activeTab='agendamentos';populateSels();renderTabs();
 }
-const ATABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa 📍'},{id:'solicitar',l:'Solicitar'},{id:'minhas',l:'Minhas'},{id:'dashboard',l:'Dash 📊'}];
+const ATABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'solicitar',l:'Solicitar'},{id:'minhas',l:'Minhas'}];
 const GTABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa Logístico 📍'},{id:'solicitacoes',l:'Solicitações'},{id:'dashboard',l:'Dashboard 📊'},{id:'upload',l:'Gestão'}];
 function renderTabs(){if(!currentUser)return;const tabs=currentUser.role==='programador'?GTABS:ATABS;document.getElementById('tabs').innerHTML=tabs.map(t=>`<div class="tab${t.id===activeTab?' on':''}" onclick="goTab('${t.id}')">${t.l}</div>`).join('');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));const ap=document.getElementById('panel-'+activeTab);if(ap)ap.classList.add('on');renderAll();}
 function goTab(id){activeTab=id;renderTabs();}
