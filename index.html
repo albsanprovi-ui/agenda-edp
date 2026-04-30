@@ -9,22 +9,41 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EDP Agenda">
 <link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <title>EDP · MT Agenda Regional</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#1a2332;--dark:#151d29;--green:#4dbb6e;--green2:#2ea84f;
-  --blue:#1e7fd4;--blue2:#155fab;--teal:#00c4a0;
-  --grad:linear-gradient(135deg,#4dbb6e,#1e7fd4);
-  --ok:#2ea84f;--okl:#e6f7eb;--okd:#1a6630;
-  --wn:#e08020;--wnl:#fef3e2;--wnd:#7a4510;
-  --er:#d63b3b;--erl:#fdeaea;--erd:#7a1a1a;
-  --info:#1e7fd4;--infol:#e6f2fc;--infod:#0d4a8a;
-  --bg:#f5f6fa;--bg2:#fff;--border:#e2e4ea;
-  --text:#1a2332;--text2:#6b7280;--text3:#9ca3af;
-  --purple:#7c3aed;--purplel:#ede9fe;--purpled:#4c1d95;
+:root {
+  --primary: #1e7fd4;
+  --primary-dark: #1565c0;
+  --bg: #f8f9fb;
+  --card: #ffffff;
+  --text: #1a2332;
+  --text2: #4a5568;
+  --text3: #718096;
+  --border: #e2e8f0;
+  --navy: #0f172a;
+  --green: #4dbb6e;
+  --er: #e11d48;
+  --wn: #f59e0b;
+  --blue: #3b82f6;
+  --glass: rgba(255, 255, 255, 0.8);
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --border: #334155;
+  --navy: #38bdf8;
+  --glass: rgba(15, 23, 42, 0.8);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+.btn-theme { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; }
+.btn-theme:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+.card { background: var(--card); border-radius: 12px; padding: 1.1rem 1.25rem; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 1rem; transition: transform 0.2s; }
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:linear-gradient(135deg,#0f1922 0%,#1a2332 60%,#1e3a4a 100%)}
 .login-box{background:#fff;border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.3)}
 .login-logo{text-align:center;margin-bottom:1.5rem}
@@ -54,7 +73,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab:hover{border-color:var(--blue);color:var(--blue)}
 .tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 .panel{display:none}.panel.on{display:block}
-.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04)}
 .sec{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
 select,input[type=text],input[type=date],input[type=email],input[type=password]{font-size:13px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:inherit;transition:border-color .2s}
@@ -171,36 +189,6 @@ tr:hover td{background:#f8f9fb}
 .debug-box{background:#1a1a2e;color:#a0f0a0;border:1px solid #333;border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:11px;max-height:220px;overflow-y:auto;display:none}
 .debug-box.show{display:block}
 
-/* ── HEATMAP AF ── */
-.af-heatmap-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
-.af-heatmap{border-collapse:collapse;font-size:11px;min-width:100%}
-.af-heatmap th{padding:6px 5px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;background:#f8f9fb;border:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2}
-.af-heatmap td{padding:0;border:1px solid #eef0f4;text-align:center;vertical-align:middle}
-.af-heatmap .eq-cell{padding:8px 10px;text-align:left;font-weight:700;font-family:monospace;font-size:11px;color:var(--navy);background:#fff;white-space:nowrap;position:sticky;left:0;z-index:1;border-right:2px solid var(--border);min-width:110px}
-.af-heatmap .day-hdr{text-align:center;font-size:10px;letter-spacing:0}
-.af-heatmap .day-hdr.ws{background:#f3f4f6;color:var(--text3)}
-.af-heatmap .day-hdr.fer{background:var(--erl);color:var(--erd)}
-.af-heatmap .day-hdr.leit{background:#fef3c7;color:#92400e}
-.af-heatmap .hcell{padding:6px 4px;min-width:38px;height:36px;font-weight:700;font-size:12px;transition:all .15s;cursor:default}
-.af-heatmap .hcell:hover{transform:scale(1.08);z-index:3;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.af-heatmap .hcell.h0{background:#f0fdf4;color:#166534}
-.af-heatmap .hcell.h1{background:#fef9c3;color:#854d0e}
-.af-heatmap .hcell.h2{background:#fde68a;color:#92400e}
-.af-heatmap .hcell.h3{background:#fdba74;color:#7c2d12}
-.af-heatmap .hcell.h4{background:#fca5a5;color:#7f1d1d}
-.af-heatmap .hcell.ws{background:#f9fafb;color:var(--text3)}
-.af-heatmap .hcell.fer{background:#fee2e2;color:var(--erd);font-size:9px;font-weight:600}
-.af-heatmap .hcell.leit{background:#fef3c7;color:#92400e}
-.af-heatmap .hcell.today{outline:3px solid var(--blue);outline-offset:-3px}
-.af-heatmap .total-cell{padding:8px 10px;text-align:right;font-weight:800;font-size:13px;color:var(--navy);background:#f8f9fb;border-left:2px solid var(--border);position:sticky;right:0;z-index:1}
-.af-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--text2)}
-.af-legend-item{display:flex;align-items:center;gap:4px}
-.af-legend-sq{width:16px;height:16px;border-radius:3px;border:1px solid #e5e7eb}
-.af-summary-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.af-summary-card{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:100px}
-.af-summary-card .sv{font-size:22px;font-weight:800;line-height:1}
-.af-summary-card .sl{font-size:10px;color:var(--text2);margin-top:2px}
-
 @media(max-width:640px){
   .g2{grid-template-columns:1fr}
   .ns-status-grid{grid-template-columns:repeat(2,1fr)}
@@ -242,6 +230,7 @@ tr:hover td{background:#f8f9fb}
       <div class="tlogo-text">MT · <span>Agenda Regional</span> <small style="font-size:9px;opacity:0.5;margin-left:5px">v1.2.4</small></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn-theme" onclick="toggleTheme()" title="Mudar Tema">🌓</button>
       <button id="install-btn" class="btn btn-sm" style="display:none;background:#ffeb3b;color:#000;font-weight:bold;border:none;padding:5px 10px;border-radius:20px" onclick="installApp()">📥 Instalar App</button>
       <button class="btn btn-sm" style="background:var(--bg);color:var(--navy);border:1px solid var(--border)" onclick="goTab('equipes')" id="btn-tab-equipes">⚙️ Escalas</button>
       <div><div class="tuser-name" id="t-uname">—</div><div class="tuser-role" id="t-urole">—</div></div>
@@ -305,20 +294,33 @@ tr:hover td{background:#f8f9fb}
       </div>
     </div>
 
-    <div id="panel-dashboard" class="panel">
-      <div class="g2">
-        <div class="card">
-          <div class="sec">📈 Performance por Regional</div>
-          <div class="chart-container"><canvas id="chart-regional"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="sec">📊 Status das Solicitações</div>
-          <div class="chart-container"><canvas id="chart-status"></canvas></div>
+    <div id="panel-mapa" class="panel">
+      <div class="card" style="padding:0; overflow:hidden; position:relative">
+        <div id="main-map" style="height:600px; width:100%; z-index:1"></div>
+        <div style="position:absolute; top:10px; right:10px; z-index:1000; background:var(--glass); padding:10px; border-radius:8px; border:1px solid var(--border); font-size:12px; backdrop-filter:blur(4px)">
+          <div style="font-weight:bold; margin-bottom:5px">Legenda Mapa</div>
+          <div style="display:flex; align-items:center; gap:8px"><span style="width:12px; height:12px; border-radius:50%; background:#1e7fd4"></span> Confirmado</div>
+          <div style="display:flex; align-items:center; gap:8px"><span style="width:12px; height:12px; border-radius:50%; background:#e08020"></span> Pendente</div>
         </div>
       </div>
-      <div class="card">
-        <div class="sec">📅 Demanda vs. Agendado (Mensal)</div>
-        <div class="chart-container" style="height:200px"><canvas id="chart-demanda"></canvas></div>
+    </div>
+
+    <div id="panel-dashboard" class="panel">
+      <div class="card" style="min-height:400px">
+        <div class="sec">📈 Produtividade por Regional</div>
+        <div style="height:300px"><canvas id="chart-regional"></canvas></div>
+      </div>
+      <div class="card" style="min-height:400px">
+        <div class="sec">📊 Status Geral (Solicitações)</div>
+        <div style="height:300px"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="card" style="min-height:400px">
+        <div class="sec">📅 Evolução da Demanda vs Realizado</div>
+        <div style="height:300px"><canvas id="chart-demanda"></canvas></div>
+      </div>
+      <div class="card" style="min-height:400px; grid-column: 1 / -1">
+        <div class="sec">🥇 Ranking de Equipes (Top 5)</div>
+        <div style="height:300px"><canvas id="chart-ranking"></canvas></div>
       </div>
     </div>
 
@@ -364,6 +366,11 @@ tr:hover td{background:#f8f9fb}
     <div id="panel-solicitacoes" class="panel"><div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px"><div class="sec" style="margin:0">solicitações</div><div style="display:flex;gap:8px"><select id="sol-filtro" onchange="renderSols()" style="font-size:12px;padding:5px 9px"><option value="">Todas</option><option value="pendente">Pendentes</option><option value="confirmado">Confirmadas</option><option value="reagendar">Reagendar</option></select><button class="btn btn-sm" onclick="solicitacoes=[];save();renderSols()">Limpar</button></div></div><div id="list-sols"></div></div></div>
 
     <div id="panel-upload" class="panel">
+      <div class="card">
+        <div class="sec">🔔 Notificações e Alertas</div>
+        <p style="font-size:12px; color:var(--text2); margin-bottom:10px">Ative as notificações para receber alertas de confirmação de notas em tempo real.</p>
+        <button class="btn btn-p" onclick="requestNotificationPermission()">Ativar Notificações Push</button>
+      </div>
       <div class="card" style="margin-bottom:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.75rem"><div class="sec" style="margin:0">📊 Demanda AF — Importação</div><span style="font-size:11px;color:var(--text2)">Visível para analistas</span></div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:.75rem;line-height:1.6">Colunas: <code>NOTA</code> · <code>REGIONAL</code> · <code>TIPO</code> · <code>EQUIPE</code> · <code>VENCIMENTO</code> (DD/MM/AAAA).<br><span style="font-size:11px">Se não tiver coluna EQUIPE, agrupa por regional. Ano base: <strong>2026</strong>.</span></div>
@@ -440,7 +447,8 @@ let cfg={email:'',pubkey:'',svcId:'',tplId:''},creds={user:'programador',pass:'e
 let loginTab='programador',activeTab='agendamentos',afMesSel='';
 let formState={contato:true,isMT:false,isBT0:false,nsStatus:null};
 const SEED=[{id:1,regional:'DSSJ',nota:'5063793566',cliente:'EXEMPLO',tipo:'VE',obs:'Demo',data:'2026-04-10',periodo:'09h',cidade:'SJC',confirmado:'SIM',equipe:'PCSJC31',isMT:false,isBT0:false,nsStatus:''}];
-function loadState(){try{creds=JSON.parse(localStorage.getItem('edp_creds')||JSON.stringify(creds))}catch(e){}}loadState();
+function loadState(){try{creds=JSON.parse(localStorage.getItem('edp_creds')||JSON.stringify(creds));const t=localStorage.getItem('edp_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}}loadState();
+function toggleTheme(){const h=document.documentElement;const t=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',t);localStorage.setItem('edp_theme',t);}
 
 window.iniciarLoadState=function(){
   if(!window.dbOnValue)return;toast('Conectando...');
@@ -466,8 +474,8 @@ function startApp(){
   document.getElementById('btn-tab-equipes').style.display=currentUser.role==='programador'?'block':'none';
   activeTab='agendamentos';populateSels();renderTabs();
 }
-const ATABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'solicitar',l:'Solicitar'},{id:'minhas',l:'Minhas Solicitações'},{id:'dashboard',l:'Dashboard 📊'}];
-const GTABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'solicitacoes',l:'Solicitações'},{id:'dashboard',l:'Dashboard 📊'},{id:'upload',l:'Importar / Gestão'}];
+const ATABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa 📍'},{id:'solicitar',l:'Solicitar'},{id:'minhas',l:'Minhas'},{id:'dashboard',l:'Dash 📊'}];
+const GTABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa Logístico 📍'},{id:'solicitacoes',l:'Solicitações'},{id:'dashboard',l:'Dashboard 📊'},{id:'upload',l:'Gestão'}];
 function renderTabs(){if(!currentUser)return;const tabs=currentUser.role==='programador'?GTABS:ATABS;document.getElementById('tabs').innerHTML=tabs.map(t=>`<div class="tab${t.id===activeTab?' on':''}" onclick="goTab('${t.id}')">${t.l}</div>`).join('');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));const ap=document.getElementById('panel-'+activeTab);if(ap)ap.classList.add('on');renderAll();}
 function goTab(id){activeTab=id;renderTabs();}
 function renderAll(){renderAgend();renderDatas();renderEquipes();renderMetricas();renderSols();renderMinhas();renderRegras();renderDemandaAF();renderGestaoAF();renderRotas();if(activeTab==='dashboard')renderCharts();if(activeTab==='upload'){renderUploadCards();renderEmailListas();}}
@@ -799,7 +807,7 @@ function limparSol(){['s-reg','s-tipo','s-periodo','s-equipe'].forEach(id=>{cons
 
 function renderSols(){const el=document.getElementById('list-sols');if(!el)return;const f=document.getElementById('sol-filtro')?.value||'';const list=f?solicitacoes.filter(x=>x.status===f):solicitacoes;if(!list.length){el.innerHTML='<div class="empty">Nenhuma</div>';return;}el.innerHTML=[...list].reverse().map(s=>{const i=solicitacoes.findIndex(x=>x.id===s.id);return`<div class="sol-item ${s.status}"><div class="sol-header"><div style="flex:1"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="badge b-navy">${s.regional}</span>${tipoBadge(s.tipo)}${s.isMT?'<span class="badge b-info" style="font-size:10px">MT</span>':''}${s.isBT0?'<span class="badge b-ok" style="font-size:10px">BT0</span>':''}${s.nsStatus?nsBadge(s.nsStatus):''}<span style="font-size:13px;font-weight:600">${s.cidade} — ${fmtD(s.data)} ${s.periodo}</span></div><div style="font-size:12px"><div><b>Analista:</b> ${s.analista}</div><div><b>Nota:</b> ${s.nota||'—'} | <b>Vencimento:</b> ${s.vencimento?fmtD(s.vencimento):'—'} | <b>Cliente:</b> ${s.cliente||'—'}</div><div><b>Serviço:</b> ${s.obs}</div><div><b>Equipe:</b> <span style="color:var(--blue);font-weight:600">${s.equipe||'Nenhuma'}</span></div>${s.comentario?`<div style="margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)"><i>${escHtml(s.comentario)}</i></div>`:''}</div></div><div class="sol-actions">${s.status==='pendente'?`<button class="btn btn-sm btn-g" onclick="confirmarDev(${i})">Confirmar</button><button class="btn btn-sm" style="color:var(--wn);border-color:var(--wn)" onclick="document.getElementById('dev-${s.id}').classList.toggle('show')">Reagendar</button>`:`<span class="badge ${s.status==='confirmado'?'b-ok':'b-wn'}">${s.status.toUpperCase()}</span>`}<button class="btn btn-sm" style="color:var(--er);margin-top:10px" onclick="excluirSol(${i})">Excluir</button></div></div><div class="dev-box" id="dev-${s.id}"><textarea id="dmsg-${s.id}" placeholder="Motivo..." style="width:100%;min-height:60px;margin-bottom:8px"></textarea><button class="btn btn-p btn-sm" onclick="enviarDev(${i})">Enviar</button></div></div>`;}).join('');}
 
-async function confirmarDev(i){const s=solicitacoes[i];solicitacoes[i]={...s,status:'confirmado',devolutiva:'confirmado',msg_devolutiva:'OK'};agend.push({id:Date.now(),regional:s.regional,nota:s.nota||'',vencimento:s.vencimento||'',cliente:s.cliente||'',tipo:s.tipo,obs:s.obs,data:s.data,periodo:s.periodo,cidade:s.cidade,confirmado:'SIM',equipe:s.equipe||'',isMT:s.isMT||false,isBT0:s.isBT0||false,nsStatus:s.nsStatus||''});save();toast('Confirmado!');}
+async function confirmarDev(i){const s=solicitacoes[i];solicitacoes[i]={...s,status:'confirmado',devolutiva:'confirmado',msg_devolutiva:'OK'};agend.push({id:Date.now(),regional:s.regional,nota:s.nota||'',vencimento:s.vencimento||'',cliente:s.cliente||'',tipo:s.tipo,obs:s.obs,data:s.data,periodo:s.periodo,cidade:s.cidade,confirmado:'SIM',equipe:s.equipe||'',isMT:s.isMT||false,isBT0:s.isBT0||false,nsStatus:s.nsStatus||''});save();toast('Confirmado!');notifyUser("Nota Confirmada! ✅", `A nota ${s.nota} para ${s.cidade} foi confirmada.`);}
 async function enviarDev(i){const s=solicitacoes[i],msg=document.getElementById(`dmsg-${s.id}`).value;if(!msg){toast('Preencha devolutiva');return;}solicitacoes[i]={...s,status:'reagendar',devolutiva:'reagendar',msg_devolutiva:msg};save();toast('Enviada!');}
 function excluirSol(i){solicitacoes.splice(i,1);save();}
 
@@ -815,12 +823,72 @@ function renderEmailListas(){const el=document.getElementById('em-listas');if(!e
 function salvarCredenciais(){const u=document.getElementById('cfg-user').value.trim(),p=document.getElementById('cfg-pass').value;creds.user=u;if(p)creds.pass=p;save();toast('Salvo!');}
 function loadCfgUI(){if(creds.user){const el=document.getElementById('cfg-user');if(el)el.value=creds.user;}}
 function renderRotas(){const el=document.getElementById('rotas-list');if(!el)return;const reg=document.getElementById('d-reg')?.value;const hj=new Date();const proximos=Array.from({length:7},(_,i)=>dataLocal(new Date(hj.getFullYear(),hj.getMonth(),hj.getDate()+i)));const agendsReg=agend.filter(a=>(!reg||a.regional===reg)&&proximos.includes(a.data));if(!agendsReg.length){el.innerHTML='<div class="empty">Nenhum agendamento para os próximos 7 dias.</div>';return;}let h='';proximos.forEach(d=>{const diaAgends=agendsReg.filter(a=>a.data===d);if(!diaAgends.length)return;h+=`<div style="margin-bottom:15px"><div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">📅 ${fmtD(d)} <span style="font-weight:400;font-size:11px;color:var(--text2)">(${diaAgends.length} notas)</span></div>`;const porCidade={};diaAgends.forEach(a=>{const c=a.cidade.toUpperCase();if(!porCidade[c])porCidade[c]=[];porCidade[c].push(a);});Object.entries(porCidade).forEach(([cid,list])=>{const eqs=[...new Set(list.map(a=>a.equipe))];h+=`<div class="rota-item"><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--navy)">${cid}</div><div style="font-size:11px;color:var(--text2)">${list.length} nota(s) • Equipes: <span style="color:var(--blue);font-weight:600">${eqs.join(', ')}</span></div></div><button class="btn btn-sm btn-p" onclick="document.getElementById('s-cidade').value='${cid}';goTab('solicitar');onCidadeChange();">Agendar aqui</button></div>`;});h+='</div>';});el.innerHTML=h;}
-let myCharts={};
-function renderCharts(){if(typeof Chart==='undefined')return;const ctxR=document.getElementById('chart-regional');const ctxS=document.getElementById('chart-status');const ctxD=document.getElementById('chart-demanda');if(!ctxR||!ctxS||!ctxD)return;if(myCharts.reg)myCharts.reg.destroy();if(myCharts.status)myCharts.status.destroy();if(myCharts.demanda)myCharts.demanda.destroy();const regData=REGIONAIS.map(r=>agend.filter(a=>a.regional===r).length);myCharts.reg=new Chart(ctxR,{type:'bar',data:{labels:REGIONAIS,datasets:[{label:'Agendamentos',data:regData,backgroundColor:'#1e7fd4',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});const st={Conf:agend.filter(a=>a.confirmado).length,Pend:solicitacoes.filter(s=>s.status==='pendente').length,Reag:solicitacoes.filter(s=>s.status==='reagendar').length};myCharts.status=new Chart(ctxS,{type:'doughnut',data:{labels:['Confirmados','Pendentes','Reagendar'],datasets:[{data:[st.Conf,st.Pend,st.Reag],backgroundColor:['#4dbb6e','#1e7fd4','#e08020'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}}}});const months=Array.from({length:6},(_,i)=>{const d=new Date();d.setMonth(d.getMonth()-i);return d.toISOString().slice(0,7);}).reverse();const dData=months.map(m=>demandaAF.filter(a=>a.mes===m).length);const aData=months.map(m=>agend.filter(a=>a.data.startsWith(m)).length);myCharts.demanda=new Chart(ctxD,{type:'line',data:{labels:months,datasets:[{label:'Demanda AF',data:dData,borderColor:'#7c3aed',backgroundColor:'#7c3aed',tension:0.3,fill:true,backgroundColor:'rgba(124,58,237,0.1)'},{label:'Realizado',data:aData,borderColor:'#4dbb6e',backgroundColor:'#4dbb6e',tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});}
+let mapInstance = null;
+const CID_COORDS = {
+  'SJC': [-23.189, -45.884], 'SAO JOSE DOS CAMPOS': [-23.189, -45.884],
+  'JACAREI': [-23.305, -45.965], 'TAUBATE': [-23.021, -45.559],
+  'PINDAMONHANGABA': [-22.923, -45.457], 'CACAPAVA': [-23.102, -45.707],
+  'TREMBE': [-22.956, -45.549], 'GUARATINGUETA': [-22.813, -45.191],
+  'LORENA': [-22.739, -45.120], 'CRUZEIRO': [-22.573, -44.970],
+  'CARAGUATATUBA': [-23.622, -45.412], 'SAO SEBASTIAO': [-23.760, -45.411],
+  'GUARULHOS': [-23.462, -46.533], 'SUZANO': [-23.537, -46.312],
+  'POA': [-23.530, -46.347], 'ITAQUAQUECETUBA': [-23.486, -46.348],
+  'FERRAZ DE VASCONCELOS': [-23.541, -46.368], 'MOGI DAS CRUZES': [-23.520, -46.185]
+};
+
+function renderMapa(){
+  if(activeTab !== 'mapa') return;
+  if(!mapInstance){
+    mapInstance = L.map('main-map').setView([-23.2, -45.9], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(mapInstance);
+  }
+  
+  // Limpar marcadores anteriores (idealmente usar LayerGroup)
+  mapInstance.eachLayer(layer => { if(layer instanceof L.Marker) mapInstance.removeLayer(layer); });
+
+  const hj = dataLocal(new Date());
+  const diaAgends = agend.filter(a => a.data === hj);
+  
+  diaAgends.forEach(a => {
+    const coords = CID_COORDS[a.cidade.toUpperCase()] || CID_COORDS[a.regional];
+    if(coords){
+      const color = a.confirmado ? '#1e7fd4' : '#e08020';
+      const markerHtml = `<div style="background-color:${color}; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4)"></div>`;
+      const icon = L.divIcon({ html: markerHtml, className: '', iconSize: [12, 12] });
+      
+      L.marker(coords, { icon })
+       .bindPopup(`<b>${a.equipe || 'Sem Equipe'}</b><br>${a.cidade}<br>${a.tipo} - ${a.periodo}<br><small>${a.cliente}</small>`)
+       .addTo(mapInstance);
+    }
+  });
+  
+  // Auto-ajuste do zoom
+  setTimeout(() => mapInstance.invalidateSize(), 200);
+}
+function renderCharts(){if(typeof Chart==='undefined')return;const ctxR=document.getElementById('chart-regional');const ctxS=document.getElementById('chart-status');const ctxD=document.getElementById('chart-demanda');const ctxRK=document.getElementById('chart-ranking');if(!ctxR||!ctxS||!ctxD||!ctxRK)return;if(myCharts.reg)myCharts.reg.destroy();if(myCharts.status)myCharts.status.destroy();if(myCharts.demanda)myCharts.demanda.destroy();if(myCharts.ranking)myCharts.ranking.destroy();const isDark=document.documentElement.getAttribute('data-theme')==='dark';const tColor=isDark?'#f1f5f9':'#1a2332';const bColor=isDark?'#334155':'#e2e8f0';const regData=REGIONAIS.map(r=>agend.filter(a=>a.regional===r).length);myCharts.reg=new Chart(ctxR,{type:'bar',data:{labels:REGIONAIS,datasets:[{label:'Agendamentos',data:regData,backgroundColor:'#1e7fd4',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tColor},grid:{display:false}},y:{ticks:{color:tColor},grid:{color:bColor},beginAtZero:true}}}});const st={Conf:agend.filter(a=>a.confirmado).length,Pend:solicitacoes.filter(s=>s.status==='pendente').length,Reag:solicitacoes.filter(s=>s.status==='reagendar').length};myCharts.status=new Chart(ctxS,{type:'doughnut',data:{labels:['Confirmados','Pendentes','Reagendar'],datasets:[{data:[st.Conf,st.Pend,st.Reag],backgroundColor:['#4dbb6e','#1e7fd4','#e08020'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:tColor,boxWidth:12,font:{size:11}}}}}});const months=Array.from({length:6},(_,i)=>{const d=new Date();d.setMonth(d.getMonth()-i);return d.toISOString().slice(0,7);}).reverse();const dData=months.map(m=>demandaAF.filter(a=>a.mes===m).length);const aData=months.map(m=>agend.filter(a=>a.data.startsWith(m)).length);myCharts.demanda=new Chart(ctxD,{type:'line',data:{labels:months,datasets:[{label:'Demanda AF',data:dData,borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.1)',tension:0.3,fill:true},{label:'Realizado',data:aData,borderColor:'#4dbb6e',backgroundColor:'#4dbb6e',tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tColor}}},scales:{x:{ticks:{color:tColor},grid:{color:bColor}},y:{ticks:{color:tColor},grid:{color:bColor},beginAtZero:true}}}});const eqCounts={};agend.filter(a=>a.confirmado).forEach(a=>{if(a.equipe){eqCounts[a.equipe]=(eqCounts[a.equipe]||0)+1;}});const sortedEqs=Object.entries(eqCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);myCharts.ranking=new Chart(ctxRK,{type:'bar',data:{labels:sortedEqs.map(e=>e[0]),datasets:[{label:'Notas Concluídas',data:sortedEqs.map(e=>e[1]),backgroundColor:'#4dbb6e',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tColor},grid:{color:bColor},beginAtZero:true},y:{ticks:{color:tColor},grid:{display:false}}}}});}
 function exportarExcel(){if(!window.currentFilteredData||!window.currentFilteredData.length){toast('Nada para exportar');return;}const exportData=window.currentFilteredData.map(a=>({Regional:a.regional,Nota:a.nota,Cliente:a.cliente,Tipo:a.tipo,Serviço:a.obs,Data:a.data,Período:a.periodo,Cidade:a.cidade,Equipe:a.equipe,Analista:a.analista||'',MT:a.isMT?'SIM':'NÃO',BT0:a.isBT0?'SIM':'NÃO',Status:a.confirmado?'Confirmado':'Pendente'}));const ws=XLSX.utils.json_to_sheet(exportData);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Agendamentos");XLSX.writeFile(wb,`Relatorio_Logistica_${dataLocal(new Date())}.xlsx`);}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3200);}
 
-// PWA Register
+function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    toast("Este navegador não suporta notificações.");
+    return;
+  }
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      toast("Notificações ativadas!");
+      new Notification("EDP Agenda", { body: "Você agora receberá alertas de confirmação.", icon: "logo.png" });
+    }
+  });
+}
+
+function notifyUser(title, body) {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body: body, icon: "logo.png" });
+  }
+}
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('install-btn');if(b)b.style.display='block';});
 async function installApp(){if(deferredPrompt){deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;deferredPrompt=null;const b=document.getElementById('install-btn');if(b)b.style.display='none';}}

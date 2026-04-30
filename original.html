@@ -9,22 +9,41 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EDP Agenda">
 <link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <title>EDP · MT Agenda Regional</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#1a2332;--dark:#151d29;--green:#4dbb6e;--green2:#2ea84f;
-  --blue:#1e7fd4;--blue2:#155fab;--teal:#00c4a0;
-  --grad:linear-gradient(135deg,#4dbb6e,#1e7fd4);
-  --ok:#2ea84f;--okl:#e6f7eb;--okd:#1a6630;
-  --wn:#e08020;--wnl:#fef3e2;--wnd:#7a4510;
-  --er:#d63b3b;--erl:#fdeaea;--erd:#7a1a1a;
-  --info:#1e7fd4;--infol:#e6f2fc;--infod:#0d4a8a;
-  --bg:#f5f6fa;--bg2:#fff;--border:#e2e4ea;
-  --text:#1a2332;--text2:#6b7280;--text3:#9ca3af;
-  --purple:#7c3aed;--purplel:#ede9fe;--purpled:#4c1d95;
+:root {
+  --primary: #1e7fd4;
+  --primary-dark: #1565c0;
+  --bg: #f8f9fb;
+  --card: #ffffff;
+  --text: #1a2332;
+  --text2: #4a5568;
+  --text3: #718096;
+  --border: #e2e8f0;
+  --navy: #0f172a;
+  --green: #4dbb6e;
+  --er: #e11d48;
+  --wn: #f59e0b;
+  --blue: #3b82f6;
+  --glass: rgba(255, 255, 255, 0.8);
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --border: #334155;
+  --navy: #38bdf8;
+  --glass: rgba(15, 23, 42, 0.8);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+.btn-theme { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; }
+.btn-theme:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+.card { background: var(--card); border-radius: 12px; padding: 1.1rem 1.25rem; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 1rem; transition: transform 0.2s; }
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:linear-gradient(135deg,#0f1922 0%,#1a2332 60%,#1e3a4a 100%)}
 .login-box{background:#fff;border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.3)}
 .login-logo{text-align:center;margin-bottom:1.5rem}
@@ -54,7 +73,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab:hover{border-color:var(--blue);color:var(--blue)}
 .tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 .panel{display:none}.panel.on{display:block}
-.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04)}
 .sec{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
 select,input[type=text],input[type=date],input[type=email],input[type=password]{font-size:13px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:inherit;transition:border-color .2s}
@@ -171,36 +189,6 @@ tr:hover td{background:#f8f9fb}
 .debug-box{background:#1a1a2e;color:#a0f0a0;border:1px solid #333;border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:11px;max-height:220px;overflow-y:auto;display:none}
 .debug-box.show{display:block}
 
-/* ── HEATMAP AF ── */
-.af-heatmap-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
-.af-heatmap{border-collapse:collapse;font-size:11px;min-width:100%}
-.af-heatmap th{padding:6px 5px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;background:#f8f9fb;border:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2}
-.af-heatmap td{padding:0;border:1px solid #eef0f4;text-align:center;vertical-align:middle}
-.af-heatmap .eq-cell{padding:8px 10px;text-align:left;font-weight:700;font-family:monospace;font-size:11px;color:var(--navy);background:#fff;white-space:nowrap;position:sticky;left:0;z-index:1;border-right:2px solid var(--border);min-width:110px}
-.af-heatmap .day-hdr{text-align:center;font-size:10px;letter-spacing:0}
-.af-heatmap .day-hdr.ws{background:#f3f4f6;color:var(--text3)}
-.af-heatmap .day-hdr.fer{background:var(--erl);color:var(--erd)}
-.af-heatmap .day-hdr.leit{background:#fef3c7;color:#92400e}
-.af-heatmap .hcell{padding:6px 4px;min-width:38px;height:36px;font-weight:700;font-size:12px;transition:all .15s;cursor:default}
-.af-heatmap .hcell:hover{transform:scale(1.08);z-index:3;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.af-heatmap .hcell.h0{background:#f0fdf4;color:#166534}
-.af-heatmap .hcell.h1{background:#fef9c3;color:#854d0e}
-.af-heatmap .hcell.h2{background:#fde68a;color:#92400e}
-.af-heatmap .hcell.h3{background:#fdba74;color:#7c2d12}
-.af-heatmap .hcell.h4{background:#fca5a5;color:#7f1d1d}
-.af-heatmap .hcell.ws{background:#f9fafb;color:var(--text3)}
-.af-heatmap .hcell.fer{background:#fee2e2;color:var(--erd);font-size:9px;font-weight:600}
-.af-heatmap .hcell.leit{background:#fef3c7;color:#92400e}
-.af-heatmap .hcell.today{outline:3px solid var(--blue);outline-offset:-3px}
-.af-heatmap .total-cell{padding:8px 10px;text-align:right;font-weight:800;font-size:13px;color:var(--navy);background:#f8f9fb;border-left:2px solid var(--border);position:sticky;right:0;z-index:1}
-.af-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--text2)}
-.af-legend-item{display:flex;align-items:center;gap:4px}
-.af-legend-sq{width:16px;height:16px;border-radius:3px;border:1px solid #e5e7eb}
-.af-summary-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.af-summary-card{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:100px}
-.af-summary-card .sv{font-size:22px;font-weight:800;line-height:1}
-.af-summary-card .sl{font-size:10px;color:var(--text2);margin-top:2px}
-
 @media(max-width:640px){
   .g2{grid-template-columns:1fr}
   .ns-status-grid{grid-template-columns:repeat(2,1fr)}
@@ -223,16 +211,6 @@ tr:hover td{background:#f8f9fb}
       <div class="ltab" id="lt-anal" onclick="setLoginTab('analista')">Analista</div>
     </div>
     <div id="lf-prog">
-      <div class="g2">
-        <div class="fr"><label>Regional</label><select id="esc-reg" onchange="updateEscEquipeOptions()"></select></div>
-        <div class="fr"><label>Equipe</label><select id="esc-equipe"></select></div>
-      </div>
-      <div class="g2">
-        <div class="fr"><label>Início</label><input type="date" id="esc-inicio"></div>
-        <div class="fr"><label>Fim</label><input type="date" id="esc-fim"></div>
-      </div>
-      <div class="fr"><label>Motivo</label><input type="text" id="esc-motivo" placeholder="Ex: Férias, Treinamento, Escala TBT"></div>
-      <button class="btn btn-p" style="width:100%" onclick="addEscala()">Salvar Ausência</button>
       <div class="fr"><label>Usuário</label><input type="text" id="l-user" placeholder="programador"></div>
       <div class="fr"><label>Senha</label><input type="password" id="l-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
     </div>
@@ -252,7 +230,9 @@ tr:hover td{background:#f8f9fb}
       <div class="tlogo-text">MT · <span>Agenda Regional</span> <small style="font-size:9px;opacity:0.5;margin-left:5px">v1.2.4</small></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn-theme" onclick="toggleTheme()" title="Mudar Tema">🌓</button>
       <button id="install-btn" class="btn btn-sm" style="display:none;background:#ffeb3b;color:#000;font-weight:bold;border:none;padding:5px 10px;border-radius:20px" onclick="installApp()">📥 Instalar App</button>
+      <button class="btn btn-sm" style="background:var(--bg);color:var(--navy);border:1px solid var(--border)" onclick="goTab('equipes')" id="btn-tab-equipes">⚙️ Escalas</button>
       <div><div class="tuser-name" id="t-uname">—</div><div class="tuser-role" id="t-urole">—</div></div>
       <button class="tbtn-out" onclick="doLogout()">Sair</button>
     </div>
@@ -260,20 +240,7 @@ tr:hover td{background:#f8f9fb}
   <div class="main">
     <div class="tabs" id="tabs"></div>
 
-    <div id="panel-agendamentos" class="panel">
-      <div class="card">
-        <div class="sec">filtros e exportação</div>
-        <div class="filters">
-          <select id="f-reg" onchange="renderAgend()"><option value="">Regionais</option></select>
-          <select id="f-tipo" onchange="renderAgend()"><option value="">Tipos</option></select>
-          <select id="f-conf" onchange="renderAgend()"><option value="">Status</option><option value="sim">Confirmados</option><option value="nao">Pendentes</option></select>
-          <select id="f-analista" onchange="renderAgend()"><option value="">Analistas</option></select>
-          <input type="text" id="f-busca" placeholder="Nota, cidade, equipe..." oninput="renderAgend()" style="min-width:180px;flex:1">
-          <button class="btn btn-sm btn-p" onclick="exportarExcel()" style="padding:10px 15px">📥 Exportar Excel</button>
-        </div>
-        <div class="tw"><table><thead><tr><th>Regional</th><th>Nota</th><th>Cliente</th><th>Tipo</th><th>Observação</th><th>Data</th><th>Per.</th><th>Cidade</th><th>Equipe</th><th>MT</th><th>BT0</th><th>NS</th><th>Status</th></tr></thead><tbody id="tb-agend"></tbody></table></div>
-      </div>
-    </div>
+    <div id="panel-agendamentos" class="panel"><div class="card"><div class="sec">filtros</div><div class="filters"><select id="f-reg" onchange="renderAgend()"><option value="">Todas as regionais</option></select><select id="f-tipo" onchange="renderAgend()"><option value="">Todos os tipos</option></select><select id="f-conf" onchange="renderAgend()"><option value="">Todos</option><option value="sim">Confirmados</option><option value="nao">Pendentes</option></select><input type="text" id="f-busca" placeholder="Nota, cidade, equipe..." oninput="renderAgend()" style="min-width:200px;flex:1"></div><div class="tw"><table><thead><tr><th>Regional</th><th>Nota</th><th>Cliente</th><th>Tipo</th><th>Observação</th><th>Data</th><th>Per.</th><th>Cidade</th><th>Equipe</th><th>MT</th><th>BT0</th><th>NS</th><th>Status</th></tr></thead><tbody id="tb-agend"></tbody></table></div></div></div>
 
     <div id="panel-disponibilidade" class="panel">
       <div class="leitura-banner" id="leitura-banner-disp"><div class="leitura-banner-icon">📖</div><div class="leitura-banner-body"><div class="leitura-banner-title">Período de Leitura — primeiros 5 dias úteis</div><div class="leitura-banner-text">Dias em <strong>amarelo</strong> no heatmap abaixo.</div></div></div>
@@ -297,7 +264,7 @@ tr:hover td{background:#f8f9fb}
         <div id="af-weekly-grid"></div>
       </div>
       <div class="g2">
-        <div class="card"><div class="sec">calendário por regional</div><div class="filters"><select id="d-reg" onchange="renderDatas();renderEquipes();renderRotas()"><option value="">Selecione</option></select><input type="text" id="d-cidade" placeholder="Cidade (opcional)" oninput="renderDatas()" style="max-width:150px"></div><div class="avail-grid" id="grid-datas"></div></div>
+        <div class="card"><div class="sec">calendário por regional</div><div class="filters"><select id="d-reg" onchange="renderDatas()"><option value="">Selecione</option></select></div><div class="avail-grid" id="grid-datas"></div></div>
         <div class="card"><div class="sec">equipes por regional</div><div class="filters"><select id="e-reg" onchange="renderEquipes()"><option value="">Selecione</option></select><input type="date" id="e-data" onchange="renderEquipes()"></div><div id="list-equipes"><div class="empty">Selecione uma regional</div></div></div>
       </div>
       <div class="card" id="rotas-card">
@@ -305,21 +272,55 @@ tr:hover td{background:#f8f9fb}
         <div id="rotas-list"></div>
       </div>
     </div>
-
-    <div id="panel-dashboard" class="panel">
-      <div class="g2">
-        <div class="card">
-          <div class="sec">📈 Performance por Regional</div>
-          <div class="chart-container"><canvas id="chart-regional"></canvas></div>
+    
+    <div class="panel" id="panel-equipes">
+      <div class="card">
+        <div class="sec">📅 Gestão de Escalas e Férias</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:15px">Cadastre períodos de ausência ou escalas especiais para as equipes.</p>
+        <div class="g2">
+          <div class="fr"><label>Regional</label><select id="esc-reg" onchange="updateEscEquipeOptions()"></select></div>
+          <div class="fr"><label>Equipe</label><select id="esc-equipe"></select></div>
         </div>
-        <div class="card">
-          <div class="sec">📊 Status das Solicitações</div>
-          <div class="chart-container"><canvas id="chart-status"></canvas></div>
+        <div class="g2">
+          <div class="fr"><label>Início</label><input type="date" id="esc-inicio"></div>
+          <div class="fr"><label>Fim</label><input type="date" id="esc-fim"></div>
         </div>
+        <div class="fr"><label>Motivo</label><input type="text" id="esc-motivo" placeholder="Ex: Férias, Treinamento, Escala TBT"></div>
+        <button class="btn btn-p" style="width:100%" onclick="addEscala()">Salvar Ausência</button>
       </div>
       <div class="card">
-        <div class="sec">📅 Demanda vs. Agendado (Mensal)</div>
-        <div class="chart-container" style="height:200px"><canvas id="chart-demanda"></canvas></div>
+        <div class="sec">Ausências Ativas</div>
+        <div id="list-escalas"></div>
+      </div>
+    </div>
+
+    <div id="panel-mapa" class="panel">
+      <div class="card" style="padding:0; overflow:hidden; position:relative">
+        <div id="main-map" style="height:600px; width:100%; z-index:1"></div>
+        <div style="position:absolute; top:10px; right:10px; z-index:1000; background:var(--glass); padding:10px; border-radius:8px; border:1px solid var(--border); font-size:12px; backdrop-filter:blur(4px)">
+          <div style="font-weight:bold; margin-bottom:5px">Legenda Mapa</div>
+          <div style="display:flex; align-items:center; gap:8px"><span style="width:12px; height:12px; border-radius:50%; background:#1e7fd4"></span> Confirmado</div>
+          <div style="display:flex; align-items:center; gap:8px"><span style="width:12px; height:12px; border-radius:50%; background:#e08020"></span> Pendente</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-dashboard" class="panel">
+      <div class="card" style="min-height:400px">
+        <div class="sec">📈 Produtividade por Regional</div>
+        <div style="height:300px"><canvas id="chart-regional"></canvas></div>
+      </div>
+      <div class="card" style="min-height:400px">
+        <div class="sec">📊 Status Geral (Solicitações)</div>
+        <div style="height:300px"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="card" style="min-height:400px">
+        <div class="sec">📅 Evolução da Demanda vs Realizado</div>
+        <div style="height:300px"><canvas id="chart-demanda"></canvas></div>
+      </div>
+      <div class="card" style="min-height:400px; grid-column: 1 / -1">
+        <div class="sec">🥇 Ranking de Equipes (Top 5)</div>
+        <div style="height:300px"><canvas id="chart-ranking"></canvas></div>
       </div>
     </div>
 
@@ -328,20 +329,33 @@ tr:hover td{background:#f8f9fb}
         <div class="card">
           <div class="sec">nova solicitação</div>
           <div class="g2"><div class="fr"><label>Regional *</label><select id="s-reg" style="width:100%" onchange="onRegChange(); sugerirMelhorDataIA();"><option value="">Selecione...</option></select></div><div class="fr"><label>Tipo *</label><select id="s-tipo" style="width:100%" onchange="onTipoChange(); sugerirMelhorDataIA();"><option value="">Selecione...</option></select></div></div>
-          <div class="g2"><div class="fr"><label>Nota</label><input type="text" id="s-nota" style="width:100%"></div><div class="fr"><label>Período *</label><select id="s-periodo" style="width:100%" onchange="checkConflito()"><option value="">Selecione...</option><option>09h</option><option>14h</option></select></div></div>
+          <div class="g2"><div class="fr"><label>Nota</label><input type="text" id="s-nota" style="width:100%"></div><div class="fr"><label>Vencimento da Nota *</label><input type="date" id="s-vencimento" style="width:100%" onchange="onVencimentoChange()"></div></div>
+          <div class="g2"><div class="fr"><label>Período *</label><select id="s-periodo" style="width:100%" onchange="checkConflito()"><option value="">Selecione...</option><option>09h</option><option>14h</option></select></div><div class="fr"><label>Cidade *</label><input type="text" id="s-cidade" style="width:100%" oninput="onCidadeChange()"></div></div>
           <div class="fr"><label>Cliente</label><input type="text" id="s-cliente" style="width:100%"></div>
           <div class="field-divider">📞 Atendimento</div>
           <div class="fr"><label>Contato com cliente?</label><div class="toggle-group"><div class="toggle-opt sel-sim" id="opt-sim" onclick="setContato(true)"><div class="toggle-dot"></div>Sim</div><div class="toggle-opt" id="opt-nao" onclick="setContato(false)"><div class="toggle-dot"></div>Não</div></div></div>
-          <div class="g2"><div class="fr"><label>Data *</label><input type="date" id="s-data" style="width:100%" onchange="onDataChange()"><div id="holiday-box"></div><div class="leitura-banner" id="leitura-banner-sol" style="margin-top:8px"><div class="leitura-banner-icon">📖</div><div class="leitura-banner-body"><div class="leitura-banner-title">Período de Leitura</div><div class="leitura-banner-text">5 primeiros dias úteis do mês.</div></div></div></div><div class="fr"><label>Cidade *</label><input type="text" id="s-cidade" style="width:100%" oninput="onCidadeChange()"></div></div>
-          <div class="fr"><label>Serviço *</label><input type="text" id="s-obs" style="width:100%" oninput="atualizarTempoEstimado()"></div><div id="tempo-estimado"></div>
-          <div class="fr"><label>Equipe sugerida</label><select id="s-equipe" style="width:100%" onchange="checkConflito()"><option value="">— automático —</option></select><div id="equipe-hint"></div><div id="conflito-box"></div></div>
+          <div class="g2"><div class="fr"><label>Data *</label><input type="date" id="s-data" style="width:100%" onchange="onDataChange()"><div id="ai-sugg-box"></div><div id="holiday-box"></div><div class="leitura-banner" id="leitura-banner-sol" style="margin-top:8px"><div class="leitura-banner-icon">📖</div><div class="leitura-banner-body"><div class="leitura-banner-title">Período de Leitura</div><div class="leitura-banner-text">5 primeiros dias úteis do mês.</div></div></div></div><div class="fr"><label>Equipe sugerida</label><select id="s-equipe" style="width:100%" onchange="checkConflito()"><option value="">— automático —</option></select><div id="equipe-hint"></div><div id="conflito-box"></div></div></div>
+          <div class="fr"><label>Serviço *</label><input type="text" id="s-obs" style="width:100%" oninput="atualizarTempoEstimado()"></div>
+          
+          <div id="ln-fields" style="display:none; background:var(--bg); padding:12px; border-radius:10px; margin-bottom:15px; border:1px dashed var(--border)">
+            <label style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:8px; display:block">📋 Detalhes de Ligação Nova</label>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+               <span style="font-size:12px">Acompanha Desligamento BT?</span>
+               <label class="switch"><input type="checkbox" id="s-ln-bt" onchange="toggleLnBt()"><span class="slider"></span></label>
+            </div>
+            <div id="ln-bt-nota-wrap" style="display:none">
+              <label style="font-size:11px">Número da Nota BT *</label>
+              <input type="text" id="s-ln-nota-bt" placeholder="Nota de Desligamento BT">
+            </div>
+          </div>
+          
+          <div id="tempo-estimado"></div>
           <div class="field-divider">📋 Questionário</div>
           <div class="fr"><label>Nota é MT?</label><div class="toggle-group"><div class="toggle-opt sel-nao" id="mt-nao" onclick="setToggle('mt',false)"><div class="toggle-dot"></div>Não</div><div class="toggle-opt" id="mt-sim" onclick="setToggle('mt',true)"><div class="toggle-dot"></div>Sim</div></div><div id="mt-hint"></div></div>
           <div class="fr"><label>Nota é BT0?</label><div class="toggle-group"><div class="toggle-opt sel-nao" id="bt0-nao" onclick="setToggle('bt0',false)"><div class="toggle-dot"></div>Não</div><div class="toggle-opt" id="bt0-sim" onclick="setToggle('bt0',true)"><div class="toggle-dot"></div>Sim</div></div><div id="bt0-hint"></div></div>
           <div class="fr"><label>Status NS</label><div class="ns-status-grid" id="ns-grid"><div class="ns-opt" id="ns-IMP" onclick="setNsStatus('IMP')"><div class="ns-code">IMP</div><div class="ns-label">Importada</div></div><div class="ns-opt" id="ns-REAG" onclick="setNsStatus('REAG')"><div class="ns-code">REAG</div><div class="ns-label">Reagendada</div></div><div class="ns-opt" id="ns-REPR" onclick="setNsStatus('REPR')"><div class="ns-code">REPR</div><div class="ns-label">Reprogramada</div></div><div class="ns-opt" id="ns-REJE" onclick="setNsStatus('REJE')"><div class="ns-code">REJE</div><div class="ns-label">Rejeitada</div></div></div><div id="ns-hint" style="margin-top:6px"></div></div>
           <div class="fr"><label>Comentário</label><textarea id="s-comentario" style="width:100%;min-height:60px"></textarea></div>
           <div style="display:flex;gap:8px;margin-top:1rem"><button class="btn btn-p" onclick="enviarSol()">Enviar</button><button class="btn" onclick="limparSol()">Limpar</button></div>
-          <div id="ai-sugg-box"></div>
         </div>
         <div class="card"><div class="sec">equipes compatíveis</div><div id="regras-panel"><div class="empty">Selecione regional e tipo</div></div><div id="feriados-panel" style="margin-top:10px"></div></div>
       </div>
@@ -352,6 +366,11 @@ tr:hover td{background:#f8f9fb}
     <div id="panel-solicitacoes" class="panel"><div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px"><div class="sec" style="margin:0">solicitações</div><div style="display:flex;gap:8px"><select id="sol-filtro" onchange="renderSols()" style="font-size:12px;padding:5px 9px"><option value="">Todas</option><option value="pendente">Pendentes</option><option value="confirmado">Confirmadas</option><option value="reagendar">Reagendar</option></select><button class="btn btn-sm" onclick="solicitacoes=[];save();renderSols()">Limpar</button></div></div><div id="list-sols"></div></div></div>
 
     <div id="panel-upload" class="panel">
+      <div class="card">
+        <div class="sec">🔔 Notificações e Alertas</div>
+        <p style="font-size:12px; color:var(--text2); margin-bottom:10px">Ative as notificações para receber alertas de confirmação de notas em tempo real.</p>
+        <button class="btn btn-p" onclick="requestNotificationPermission()">Ativar Notificações Push</button>
+      </div>
       <div class="card" style="margin-bottom:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.75rem"><div class="sec" style="margin:0">📊 Demanda AF — Importação</div><span style="font-size:11px;color:var(--text2)">Visível para analistas</span></div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:.75rem;line-height:1.6">Colunas: <code>NOTA</code> · <code>REGIONAL</code> · <code>TIPO</code> · <code>EQUIPE</code> · <code>VENCIMENTO</code> (DD/MM/AAAA).<br><span style="font-size:11px">Se não tiver coluna EQUIPE, agrupa por regional. Ano base: <strong>2026</strong>.</span></div>
@@ -417,9 +436,6 @@ const FERIADOS_MUNICIPAIS = {
 };
 function calcFM(ano){const a=ano%19,b=Math.floor(ano/100),c=ano%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),ms=Math.floor((h+l-7*m+114)/31),di=(h+l-7*m+114)%31+1,p=new Date(ano,ms-1,di),fm=d=>d.toISOString().slice(5,10);const c2=new Date(p);c2.setDate(p.getDate()-48);const c3=new Date(p);c3.setDate(p.getDate()-47);const qs=new Date(p);qs.setDate(p.getDate()-3);const sx=new Date(p);sx.setDate(p.getDate()-2);const cc=new Date(p);cc.setDate(p.getDate()+60);return{[fm(c2)]:{nome:'Carnaval',tipo:'Nacional'},[fm(c3)]:{nome:'Carnaval',tipo:'Nacional'},[fm(qs)]:{nome:'Qta Santa',tipo:'Nacional'},[fm(sx)]:{nome:'Sxt Santa',tipo:'Nacional'},[fm(p)]:{nome:'Páscoa',tipo:'Nacional'},[fm(cc)]:{nome:'Corpus Christi',tipo:'Nacional'}};}
 const _fm25=calcFM(2025),_fm26=calcFM(2026);
-function isEquipeDisponivel(eq,data){if(!data)return true;return!escalasEquipes.some(s=>s.equipe===eq&&data>=s.inicio&&data<=s.fim);}
-function updateEscEquipeOptions(){const reg=document.getElementById('esc-reg')?.value;const el=document.getElementById('esc-equipe');if(!el)return;if(!reg){el.innerHTML='<option value="">Selecione Regional</option>';return;}const eqs=getEquipesByReg(reg);el.innerHTML=eqs.map(e=>`<option value="${e.nome}">${e.nome}</option>`).join('');}
-function getEquipesByReg(reg){return Object.entries(EQUIPES).filter(([k,v])=>v.reg===reg).map(([k,v])=>({nome:k}));}
 function isFeriado(ds,cid=''){if(!ds)return null;const mm=ds.slice(5),ano=+ds.slice(0,4),mv=ano===2025?_fm25:ano===2026?_fm26:{},dw=new Date(ds+'T12:00:00').getDay();if(dw===0)return{nome:'Domingo',tipo:'Fim de semana'};if(dw===6)return{nome:'Sábado',tipo:'Fim de semana'};const nat=FERIADOS[mm]||mv[mm];if(nat)return nat;if(cid){const norm=cid.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");const mun=FERIADOS_MUNICIPAIS[norm];if(mun&&mun[mm])return{nome:mun[mm],tipo:'Municipal'};}return null;}
 function dataLocal(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function normalizarData(raw){if(raw===null||raw===undefined||raw==='')return'';if(Object.prototype.toString.call(raw)==='[object Date]')return raw.getFullYear()+'-'+String(raw.getMonth()+1).padStart(2,'0')+'-'+String(raw.getDate()).padStart(2,'0');if(typeof raw==='number'&&!isNaN(raw)){const d=new Date((raw-25569)*86400000);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');}const s=String(raw).trim();if(s.includes('/')){const p=s.split('/');if(p.length===3)return(p[2].length===2?'20'+p[2]:p[2])+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}if(s.includes('-'))return s.slice(0,10);return s;}
@@ -431,7 +447,8 @@ let cfg={email:'',pubkey:'',svcId:'',tplId:''},creds={user:'programador',pass:'e
 let loginTab='programador',activeTab='agendamentos',afMesSel='';
 let formState={contato:true,isMT:false,isBT0:false,nsStatus:null};
 const SEED=[{id:1,regional:'DSSJ',nota:'5063793566',cliente:'EXEMPLO',tipo:'VE',obs:'Demo',data:'2026-04-10',periodo:'09h',cidade:'SJC',confirmado:'SIM',equipe:'PCSJC31',isMT:false,isBT0:false,nsStatus:''}];
-function loadState(){try{creds=JSON.parse(localStorage.getItem('edp_creds')||JSON.stringify(creds))}catch(e){}}loadState();
+function loadState(){try{creds=JSON.parse(localStorage.getItem('edp_creds')||JSON.stringify(creds));const t=localStorage.getItem('edp_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}}loadState();
+function toggleTheme(){const h=document.documentElement;const t=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',t);localStorage.setItem('edp_theme',t);}
 
 window.iniciarLoadState=function(){
   if(!window.dbOnValue)return;toast('Conectando...');
@@ -454,12 +471,11 @@ function startApp(){
   document.getElementById('app').style.display='block';
   document.getElementById('t-uname').textContent=currentUser.name;
   document.getElementById('t-urole').textContent=currentUser.role==='programador'?'Programador':'Analista';
-  const btnEsc = document.getElementById('btn-tab-equipes');
-  if(btnEsc) btnEsc.style.display=currentUser.role==='programador'?'block':'none';
+  document.getElementById('btn-tab-equipes').style.display=currentUser.role==='programador'?'block':'none';
   activeTab='agendamentos';populateSels();renderTabs();
 }
-const ATABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'solicitar',l:'Solicitar'},{id:'minhas',l:'Minhas Solicitações'},{id:'dashboard',l:'Dashboard 📊'}];
-const GTABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'solicitacoes',l:'Solicitações'},{id:'dashboard',l:'Dashboard 📊'},{id:'upload',l:'Importar / Gestão'}];
+const ATABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa 📍'},{id:'solicitar',l:'Solicitar'},{id:'minhas',l:'Minhas'},{id:'dashboard',l:'Dash 📊'}];
+const GTABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa Logístico 📍'},{id:'solicitacoes',l:'Solicitações'},{id:'dashboard',l:'Dashboard 📊'},{id:'upload',l:'Gestão'}];
 function renderTabs(){if(!currentUser)return;const tabs=currentUser.role==='programador'?GTABS:ATABS;document.getElementById('tabs').innerHTML=tabs.map(t=>`<div class="tab${t.id===activeTab?' on':''}" onclick="goTab('${t.id}')">${t.l}</div>`).join('');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));const ap=document.getElementById('panel-'+activeTab);if(ap)ap.classList.add('on');renderAll();}
 function goTab(id){activeTab=id;renderTabs();}
 function renderAll(){renderAgend();renderDatas();renderEquipes();renderMetricas();renderSols();renderMinhas();renderRegras();renderDemandaAF();renderGestaoAF();renderRotas();if(activeTab==='dashboard')renderCharts();if(activeTab==='upload'){renderUploadCards();renderEmailListas();}}
@@ -467,9 +483,6 @@ function renderAll(){renderAgend();renderDatas();renderEquipes();renderMetricas(
 function getDiasUteisDoMes(a,m){const d=[],t=new Date(a,m,0).getDate();for(let i=1;i<=t;i++){const s=`${a}-${String(m).padStart(2,'0')}-${String(i).padStart(2,'0')}`;if(!isFeriado(s))d.push(s);}return d;}
 function isPeriodoLeitura(ds){if(!ds||ds.length<10)return false;return getDiasUteisDoMes(+ds.slice(0,4),+ds.slice(5,7)).slice(0,5).includes(ds);}
 
-// ============================================================
-// UPLOAD AF — com coluna EQUIPE opcional
-// ============================================================
 function handleUploadAF(input){
   const file=input.files[0];if(!file)return;
   const prev=document.getElementById('af-upload-preview'),dbg=document.getElementById('af-debug-box');
@@ -525,9 +538,6 @@ function renderAFMesTabs(){
   el.innerHTML=Array.from({length:12},(_,i)=>{const m=ANO_BASE+'-'+String(i+1).padStart(2,'0');return`<button class="af-mes-tab${m===afMesSel?' on':''}" onclick="afMesSel='${m}';renderDemandaAF();renderAFMesTabs()">${MN[i]}</button>`;}).join('');
 }
 
-// ============================================================
-// HEATMAP — Equipe × Dia
-// ============================================================
 function renderDemandaAF(){renderAFMesTabs();const el=document.getElementById('af-demand-grid');if(!el)return;const regF=document.getElementById('af-reg-filter')?.value||'';if(!afMesSel){el.innerHTML='<div class="empty">Selecione um mês.</div>';return;}const [anoStr,mesStr]=afMesSel.split('-');const ano=+anoStr,mes=+mesStr;const diasNoMes=new Date(ano,mes,0).getDate();const leituraSet=new Set(getDiasUteisDoMes(ano,mes).slice(0,5));const hojeStr=dataLocal(new Date());const fonte=demandaAF.filter(a=>{if(a.mes!==afMesSel)return false;if(regF&&a.regional&&a.regional!==regF)return false;return true;});if(!fonte.length){el.innerHTML='<div class="empty" style="padding:1rem">Nenhuma nota AF neste mês.</div>';return;}const hasEq=fonte.some(a=>a.equipe);const label=hasEq?'Equipe':'Regional';const map={};fonte.forEach(a=>{const key=a.equipe||a.regional||'?';if(!map[key]){const r=a.equipe?(EQUIPES[a.equipe]?.reg||a.regional||''):(a.regional||'');const cs=a.equipe?(EQUIPES[a.equipe]?.cidades||[]):[];map[key]={d:{},reg:r,cs:cs};}if(a.data&&a.data.length>=10){const dia=+a.data.slice(8,10);if(dia>=1&&dia<=diasNoMes)map[key].d[dia]=(map[key].d[dia]||0)+1;}});const equipes=Object.keys(map).sort((a,b)=>{const ta=Object.values(map[a].d).reduce((s,v)=>s+v,0);const tb=Object.values(map[b].d).reduce((s,v)=>s+v,0);return tb-ta;});let maxVal=1;equipes.forEach(eq=>{Object.values(map[eq].d).forEach(v=>{if(v>maxVal)maxVal=v;});});const DN=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];let html='<div class="af-heatmap-wrap"><table class="af-heatmap"><thead><tr><th style="position:sticky;left:0;z-index:3;background:#f8f9fb;min-width:130px">'+label+'</th>';for(let d=1;d<=diasNoMes;d++){const ds=`${ano}-${mesStr}-${String(d).padStart(2,'0')}`;const dw=new Date(ds+'T12:00:00').getDay();const f=isFeriado(ds);const isWs=f&&f.tipo==='Fim de semana',isFer=f&&f.tipo!=='Fim de semana';const isLeit=leituraSet.has(ds);let cls='day-hdr';if(isWs)cls+=' ws';else if(isFer)cls+=' fer';else if(isLeit)cls+=' leit';const lbl=isFer?f.nome.slice(0,3):DN[dw];html+=`<th class="${cls}" title="${isFer||isWs?f.nome:''}">${d}<br><span style="font-weight:400;opacity:.7">${lbl}</span></th>`;}html+='<th style="position:sticky;right:0;z-index:3;background:#f8f9fb">Total</th></tr></thead><tbody>';let grandTotal=0,maxDiaVal=0;equipes.forEach(eq=>{const data=map[eq];const row=data.d;let total=0;html+=`<tr><td class="eq-cell">${eq}${data.reg?` <span style="font-size:9px;opacity:.6">(${data.reg})</span>`:''}</td>`;for(let d=1;d<=diasNoMes;d++){const ds=`${ano}-${mesStr}-${String(d).padStart(2,'0')}`;const f=isFeriado(ds);let mf=null;if(!f&&data.cs.length){for(const c of data.cs){mf=isFeriado(ds,c);if(mf)break;}}const ff=f||mf;const isWs=ff&&ff.tipo==='Fim de semana',isFer=ff&&ff.tipo!=='Fim de semana';const isLeit=leituraSet.has(ds),isToday=ds===hojeStr,val=row[d]||0;total+=val;if(val>maxDiaVal)maxDiaVal=val;let cls='hcell';if(isWs)cls+=' ws';else if(isFer)cls+=' fer';else if(isLeit)cls+=' leit';else if(val===0)cls+=' h0';else if(val<=2)cls+=' h1';else if(val<=4)cls+=' h2';else if(val<=6)cls+=' h3';else cls+=' h4';if(isToday)cls+=' today';if(isFer)html+=`<td class="${cls}" title="${ff.nome}">🚫</td>`;else if(isWs)html+=`<td class="${cls}">—</td>`;else html+=`<td class="${cls}" title="${eq}: ${val} AF no dia ${d}/${mesStr}">${val||''}</td>`;}grandTotal+=total;const tcls=total===0?'color:var(--text3)':total<=5?'color:var(--okd)':total<=15?'color:var(--wnd)':'color:var(--erd)';html+=`<td class="total-cell" style="${tcls}">${total}</td></tr>`;});html+='<tr style="background:#f0f2f5"><td class="eq-cell" style="font-size:10px;color:var(--text2)">TOT/DIA</td>';for(let d=1;d<=diasNoMes;d++){let diaTotal=0;equipes.forEach(eq=>{diaTotal+=(map[eq].d[d]||0);});const ds=`${ano}-${mesStr}-${String(d).padStart(2,'0')}`;const f=isFeriado(ds);const isWs=f&&f.tipo==='Fim de semana',isFer=f&&f.tipo!=='Fim de semana';const dc=isWs?'color:var(--text3)':isFer?'color:var(--erd)':diaTotal===0?'color:var(--text3)':diaTotal<=10?'color:var(--wnd)':'color:var(--erd)';html+=`<td style="padding:6px 4px;font-weight:800;font-size:11px;text-align:center;${dc}">${isWs?'—':isFer?'—':diaTotal||''}</td>`;}html+=`<td class="total-cell" style="font-size:15px;color:var(--navy)">${grandTotal}</td></tr>`;html+='</tbody></table></div>';html+=`<div class="af-legend"><div class="af-legend-item"><div class="af-legend-sq" style="background:#f0fdf4"></div>0 AF</div><div class="af-legend-item"><div class="af-legend-sq" style="background:#fef9c3"></div>1–2</div><div class="af-legend-item"><div class="af-legend-sq" style="background:#fde68a"></div>3–4</div><div class="af-legend-item"><div class="af-legend-sq" style="background:#fdba74"></div>5–6</div><div class="af-legend-item"><div class="af-legend-sq" style="background:#fca5a5"></div>7+</div><div class="af-legend-item"><div class="af-legend-sq" style="background:#fef3c7;border-color:#f59e0b"></div>Leitura</div><div class="af-legend-item"><div class="af-legend-sq" style="background:#fee2e2"></div>Feriado</div><div class="af-legend-item"><div style="width:16px;height:16px;border-radius:3px;outline:3px solid var(--blue);outline-offset:-1px"></div>Hoje</div></div>`;const numEqs=equipes.length;const maxDiaEq=equipes.reduce((mx,eq)=>{const m=Math.max(...Object.values(map[eq].d));return m>mx?m:mx;},0);html+=`<div class="af-summary-row"><div class="af-summary-card"><div class="sv" style="color:var(--navy)">${grandTotal}</div><div class="sl">Total AF no mês</div></div><div class="af-summary-card"><div class="sv" style="color:var(--blue)">${numEqs}</div><div class="sl">${hasEq?'Equipes':'Regionais'}</div></div><div class="af-summary-card"><div class="sv" style="color:var(--wnd)">${maxDiaEq}</div><div class="sl">Máx. numa equipe/dia</div></div><div class="af-summary-card"><div class="sv" style="color:var(--er)">${maxDiaVal}</div><div class="sl">Máx. num dia (todas)</div></div></div>`;el.innerHTML=html;document.getElementById('leitura-banner-disp').classList.add('show');renderDemandaSemanalAF();}
 
 function renderDemandaSemanalAF() {
@@ -649,7 +659,7 @@ function exportarDemandaSemanalExcel(){
     map[key][w]=(map[key][w]||0)+(a.qtd||1);
     weeksSet.add(w);
   });
-  const parseW=(w)=>{const p=w.split(' a ')[0].split('/');return parseInt(p[1])*100+parseInt(p[0]);};
+  const parseW=(w)=>{const p=w.split(' a ')[0].split('/');return parseInt(p[1]) * 100 + parseInt(p[0]);};
   const weeks=Array.from(weeksSet).sort((a,b)=>parseW(a)-parseW(b));
   const rows=Object.keys(map).sort().map(key=>{
     const[reg,eq]=key.split('|');const row={Regional:reg,Equipe:eq};let total=0;
@@ -661,7 +671,6 @@ function exportarDemandaSemanalExcel(){
   XLSX.writeFile(wb,`Demanda_Semanal_${afMesSel}.xlsx`);
 }
 
-// ── HELPERS ──
 function tipoBadge(t){return`<span class="tb ${['VE','MD','LE','UG','SF','DL','LR','VL','AF','II','LN','RT'].includes(t)?'t-'+t:'b-gy'}">${t||'—'}</span>`;}
 function fmtD(d){if(!d)return'—';const[y,m,dd]=d.split('-');return`${dd}/${m}/${y.slice(2)}`;}
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -674,7 +683,6 @@ function sugerirEquipe(reg,tipo,cid,isMT,isBT0,data){
   if(data)eqs=eqs.filter(e=>isEquipeDisponivel(e.nome,data));
   const c=(cid||'').toUpperCase().trim();
   return eqs.filter(e=>{
-    // Corrigido: usando a variável EQUIPES que já existe no arquivo
     const r=EQUIPES[e.nome]; 
     if(!r) return true;
     if(r.tipos && r.tipos.length > 0 && !r.tipos.includes(tipo)) return false;
@@ -686,7 +694,7 @@ function sugerirEquipe(reg,tipo,cid,isMT,isBT0,data){
 }
 function getConflitos(eq,d,p){if(!eq||!d||!p)return[];const np=normPer(p);return agend.filter(a=>a.equipe===eq&&a.data===d&&normPer(a.periodo)===np);}
 function getProximaDataLivre(eq,di,p){const np=normPer(p),oc=new Set(agend.filter(a=>a.equipe===eq&&normPer(a.periodo)===np).map(a=>a.data)),d=new Date(di);for(let i=1;i<=30;i++){d.setDate(d.getDate()+1);const ds=dataLocal(d);if(!oc.has(ds)&&!isFeriado(ds))return ds;}return null;}
-function getEquipesLivres(reg,tipo,cid,d,p,isMT,isBT0){const np=normPer(p),oc=new Set(agend.filter(a=>a.data===d&&normPer(a.periodo)===np).map(a=>a.equipe));return sugerirEquipe(reg,tipo,cid,isMT,isBT0,d).filter(e=>!oc.has(e.nome));}
+function getEquipesLivres(reg,tipo,cid,d,p,isMT,isBT0){const np=normPer(p),oc=new Set(agend.filter(a=>a.data===d&&normPer(a.periodo)===np).map(a=>a.equipe));return sugerirEquipe(reg,tipo,cid,isMT,isBT0).filter(e=>!oc.has(e.nome));}
 function checkConflito(){const eq=document.getElementById('s-equipe')?.value||'',d=document.getElementById('s-data')?.value||'',p=document.getElementById('s-periodo')?.value||'',reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',cid=document.getElementById('s-cidade')?.value||'',box=document.getElementById('conflito-box');if(!box)return;if(!eq||!d||!p){box.innerHTML='';return;}const cf=getConflitos(eq,d,p);if(!cf.length){box.innerHTML=`<div class="hint hint-ok">✓ ${eq} está livre.</div>`;setTimeout(()=>{if(box.querySelector('.hint-ok'))box.innerHTML='';},3500);return;}const c=cf[0];let sg='';const px=getProximaDataLivre(eq,d,p);if(px)sg+=`<div class="sugg-section"><div class="sugg-row"><div class="sugg-label">Próxima livre:</div><button class="btn-sugg" onclick="aplicarData('${px}')">${fmtD(px)} ${p}</button></div></div>`;const lv=getEquipesLivres(reg,tipo,cid,d,p,formState.isMT,formState.isBT0);if(lv.length)sg+=`<div class="sugg-section"><div class="sugg-row"><div class="sugg-label">Equipes livres:</div>${lv.slice(0,3).map(e=>`<button class="btn-sugg" onclick="aplicarEquipe('${e.nome}')">${e.nome}</button>`).join('')}</div></div>`;box.innerHTML=`<div class="conflict-wrap"><div class="conflict-title">⚠️ Conflito</div><div class="conflict-item"><b>${eq}</b> já possui:</div><div class="conflict-item" style="margin-top:6px;background:#fff;padding:6px 8px;border-radius:6px;border:1px solid rgba(186,117,23,.2)">${tipoBadge(c.tipo)} <b>${c.cidade}</b> <span style="color:var(--text2)">${c.obs}</span></div>${sg}</div>`;}
 function aplicarData(d){document.getElementById('s-data').value=d;onDataChange();checkConflito();toast('Data atualizada!');}
 function aplicarEquipe(eq){document.getElementById('s-equipe').value=eq;checkConflito();toast('Equipe alterada!');}
@@ -699,18 +707,29 @@ function setContato(v){formState.contato=v;document.getElementById('opt-sim').cl
 function renderRegras(){const reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',el=document.getElementById('regras-panel');if(!el)return;if(!reg&&!tipo){el.innerHTML='<div class="empty">Selecione regional e tipo</div>';return;}const eqs=sugerirEquipe(reg,tipo,'',formState.isMT,formState.isBT0);if(!eqs.length){el.innerHTML='<div class="empty">Nenhuma equipe.</div>';return;}el.innerHTML=`<div style="font-size:11px;color:var(--text2);margin-bottom:8px">${eqs.length} equipe(s):</div>`+eqs.map(e=>`<div class="team-card"><div class="team-header"><div class="av">${e.nome.slice(-2)}</div><div style="flex:1"><div class="tn">${e.nome}</div><div class="ts">${e.spec}</div></div><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">${e.aceitaMT?'<span style="font-size:10px;background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:4px;font-weight:700">MT✓</span>':''}${e.aceitaBT0?'<span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:4px;font-weight:700">BT0✓</span>':''}</div></div>${e.cidades.length?`<div style="font-size:11px;color:var(--text2);margin-top:3px">📍 ${e.cidades.join(', ')}</div>`:''}${e.obs?`<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic">${e.obs}</div>`:''}</div>`).join('');const fp=document.getElementById('feriados-panel');if(!fp)return;const hj=new Date(),pf=[];for(let i=0;i<=60;i++){const d=new Date(hj);d.setDate(d.getDate()+i);const ds=dataLocal(d),f=isFeriado(ds);if(f&&f.tipo!=='Fim de semana')pf.push({data:ds,f});if(pf.length>=4)break;}fp.innerHTML=pf.length?`<div class="sec">próximos feriados</div>`+pf.map(({data,f})=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--erl);border-radius:8px;margin-bottom:5px"><div style="font-size:12px;font-weight:600;color:var(--erd)">${fmtD(data)}</div><div style="font-size:11px;color:var(--erd)">${f.nome}</div></div>`).join(''):'';}
 function onRegChange(){updateEquipeOptions();renderRegras();}
 function onTipoChange(){updateEquipeOptions();renderRegras();checkConflito();atualizarTempoEstimado();}
-function onCidadeChange(){updateEquipeOptions();sugerirMelhorDataIA();}
+function onCidadeChange(){updateEquipeOptions();}
 
 function renderAgend(){const reg=document.getElementById('f-reg')?.value||'',tipo=document.getElementById('f-tipo')?.value||'',conf=document.getElementById('f-conf')?.value||'',analista=document.getElementById('f-analista')?.value||'',bsc=(document.getElementById('f-busca')?.value||'').toLowerCase();let data=agend.filter(a=>{if(reg&&a.regional!==reg)return false;if(tipo&&a.tipo!==tipo)return false;if(conf==='sim'&&!a.confirmado)return false;if(conf==='nao'&&a.confirmado)return false;if(analista&&a.analista!==analista)return false;if(bsc&&![a.nota,a.cidade,a.equipe,a.obs,a.regional,a.cliente,a.analista].join(' ').toLowerCase().includes(bsc))return false;return true;}).sort((a,b)=>a.data.localeCompare(b.data));window.currentFilteredData=data;const tb=document.getElementById('tb-agend');if(!tb)return;if(!data.length){tb.innerHTML='<tr><td colspan="13" class="empty">Nenhum</td></tr>';return;}tb.innerHTML=data.map(a=>`<tr><td><span class="badge b-navy">${a.regional}</span></td><td style="font-family:monospace;font-size:11px">${a.nota||'—'}</td><td style="font-size:12px;max-width:110px">${a.cliente||'—'}</td><td>${tipoBadge(a.tipo)}</td><td style="font-size:12px;max-width:150px">${a.obs||'—'}</td><td style="white-space:nowrap;font-weight:600">${fmtD(a.data)}</td><td><span class="badge b-gy">${a.periodo||'—'}</span></td><td>${a.cidade||'—'}</td><td style="font-family:monospace;font-size:11px;color:var(--blue)">${a.equipe||'—'}</td><td>${a.isMT?'<span class="badge b-info">MT</span>':'<span style="color:var(--text3);font-size:11px">—</span>'}</td><td>${a.isBT0?'<span class="badge b-ok">BT0</span>':'<span style="color:var(--text3);font-size:11px">—</span>'}</td><td>${nsBadge(a.nsStatus)}</td><td>${a.confirmado?'<span class="badge b-ok">Confirmado</span>':'<span class="badge b-wn">Pendente</span>'}</td></tr>`).join('');}
 
-function renderDatas(){const reg=document.getElementById('d-reg')?.value||'',cid=document.getElementById('d-cidade')?.value||'',el=document.getElementById('grid-datas');if(!el)return;if(!reg){el.innerHTML='<div class="empty" style="grid-column:1/-1">Selecione</div>';return;}const hj=new Date(),dias=Array.from({length:35},(_,i)=>dataLocal(new Date(hj.getFullYear(),hj.getMonth(),hj.getDate()+i)));const mp={};agend.filter(a=>a.regional===reg).forEach(a=>{if(!mp[a.data])mp[a.data]=[];mp[a.data].push(a);});el.innerHTML=dias.map(d=>{const c=(mp[d]||[]).length,[,m,dd]=d.split('-'),nm=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date(d+'T12:00:00').getDay()],f=isFeriado(d,cid),iF=f&&f.tipo!=='Fim de semana',iW=f&&f.tipo==='Fim de semana',iL=isPeriodoLeitura(d);let cl='dc';if(iF||iW)cl+=' feriado';else if(iL)cl+=' leitura';else if(c>0)cl+=' busy';return`<div class="${cl}"><div class="dl">${nm}</div><div class="dn">${dd}/${m}</div><div class="ds" style="color:${iF||iW?'var(--er)':iL?'#92400e':c>0?'var(--blue)':'var(--text2)'}">${iF?f.nome:iW?'FDS':iL?c>0?c+' ag.📖':'Leitura':c>0?c+' agend.':'livre'}</div>${iL&&!iF&&!iW?'<div class="dc-leitura-tag">LEITURA</div>':''}</div>`;}).join('');}
+function renderDatas(){const reg=document.getElementById('d-reg')?.value||'',el=document.getElementById('grid-datas');if(!el)return;if(!reg){el.innerHTML='<div class="empty" style="grid-column:1/-1">Selecione</div>';return;}const hj=new Date(),dias=Array.from({length:35},(_,i)=>dataLocal(new Date(hj.getFullYear(),hj.getMonth(),hj.getDate()+i)));const mp={};agend.filter(a=>a.regional===reg).forEach(a=>{if(!mp[a.data])mp[a.data]=[];mp[a.data].push(a);});el.innerHTML=dias.map(d=>{const c=(mp[d]||[]).length,[,m,dd]=d.split('-'),nm=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date(d+'T12:00:00').getDay()],f=isFeriado(d),iF=f&&f.tipo!=='Fim de semana',iW=f&&f.tipo==='Fim de semana',iL=isPeriodoLeitura(d);let cl='dc';if(iF||iW)cl+=' feriado';else if(iL)cl+=' leitura';else if(c>0)cl+=' busy';return`<div class="${cl}"><div class="dl">${nm}</div><div class="dn">${dd}/${m}</div><div class="ds" style="color:${iF||iW?'var(--er)':iL?'#92400e':c>0?'var(--blue)':'var(--text2)'}">${iF?'Feriado':iW?'FDS':iL?c>0?c+' ag.📖':'Leitura':c>0?c+' agend.':'livre'}</div>${iL&&!iF&&!iW?'<div class="dc-leitura-tag">LEITURA</div>':''}</div>`;}).join('');}
 
 function renderEquipes(){const reg=document.getElementById('e-reg')?.value||'',dt=document.getElementById('e-data')?.value,el=document.getElementById('list-equipes');if(!el)return;if(!reg){el.innerHTML='<div class="empty">Selecione</div>';return;}let eqs=getEquipesByReg(reg);if(dt){const ho=agend.filter(a=>a.regional===reg&&a.data===dt);eqs=eqs.map(e=>{const dq=ho.filter(x=>x.equipe===e.nome);return{...e,ocup:dq.length,agends:dq};});}el.innerHTML=eqs.map(e=>`<div class="team-card"><div class="team-header"><div class="av">${e.nome.slice(-2)}</div><div style="flex:1"><div class="tn">${e.nome}</div><div class="ts">${e.spec}</div></div>${dt?`<div style="font-size:11px;font-weight:600;color:${e.ocup>0?'var(--wnd)':'var(--okd)'};background:${e.ocup>0?'var(--wnl)':'var(--okl)'};padding:3px 8px;border-radius:6px">${e.ocup}</div>`:''}</div>${dt&&e.agends&&e.agends.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${e.agends.map(a=>`<div style="font-size:11px;color:var(--text2);margin-bottom:3px;display:flex;justify-content:space-between"><span>${tipoBadge(a.tipo)} ${a.cidade}</span><span style="font-weight:600">${a.periodo}</span></div>`).join('')}</div>`:''}</div>`).join('');}
 
-function updateEquipeOptions(){const reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',cid=document.getElementById('s-cidade')?.value||'',el=document.getElementById('s-equipe'),h=document.getElementById('equipe-hint');if(!el||!h)return;const sg=sugerirEquipe(reg,tipo,cid,formState.isMT,formState.isBT0);if(!reg||!tipo){el.innerHTML='<option value="">— automático —</option>';h.innerHTML='';checkConflito();return;}if(!sg.length){el.innerHTML='<option value="">Nenhuma</option>';h.innerHTML=`<div class="hint hint-wn">⚠️ Verifique MT/BT0/Cidade.</div>`;}else{const pv=el.value;el.innerHTML='<option value="">— automático —</option>'+sg.map(e=>`<option value="${e.nome}">${e.nome} — ${e.spec}</option>`).join('');el.value=sg.find(x=>x.nome===pv)?pv:sg[0].nome;h.innerHTML=`<div class="hint hint-ok">✓ ${sg.length} equipe(s).</div>`;}checkConflito();sugerirMelhorDataIA();}
+function updateEquipeOptions(){const reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',cid=document.getElementById('s-cidade')?.value||'',el=document.getElementById('s-equipe'),h=document.getElementById('equipe-hint');if(!el||!h)return;const data=document.getElementById('s-data')?.value;const sg=sugerirEquipe(reg,tipo,cid,formState.isMT,formState.isBT0,data);if(!reg||!tipo){el.innerHTML='<option value="">— automático —</option>';h.innerHTML='';checkConflito();return;}if(!sg.length){el.innerHTML='<option value="">Nenhuma</option>';h.innerHTML=`<div class="hint hint-wn">⚠️ Verifique MT/BT0/Cidade/Escala.</div>`;}else{const pv=el.value;el.innerHTML='<option value="">— automático —</option>'+sg.map(e=>`<option value="${e.nome}">${e.nome} — ${e.spec}</option>`).join('');el.value=sg.find(x=>x.nome===pv)?pv:sg[0].nome;h.innerHTML=`<div class="hint hint-ok">✓ ${sg.length} equipe(s).</div>`;}checkConflito();sugerirMelhorDataIA();}
 
-function onDataChange(){const d=document.getElementById('s-data')?.value||'';const venc=document.getElementById('s-vencimento')?.value||'';const cid=document.getElementById('s-cidade')?.value||'';const box=document.getElementById('holiday-box'),bs=document.getElementById('leitura-banner-sol');if(!box)return;if(d&&venc&&d===venc){document.getElementById('s-data').value='';box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 Data Inválida</div><div style="font-size:12px;color:var(--erd)">Não é possível agendar no dia do vencimento.</div></div>`;if(bs)bs.classList.remove('show');checkConflito();return;}if(!d){box.innerHTML='';if(bs)bs.classList.remove('show');checkConflito();return;}const f=isFeriado(d,cid);if(f){box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 ${f.tipo==='Fim de semana'?'Fim de semana':'Feriado'}</div><div style="font-size:12px;color:var(--erd)">${f.nome}</div></div>`;if(bs)bs.classList.remove('show');}else{box.innerHTML='';if(bs){if(isPeriodoLeitura(d))bs.classList.add('show');else bs.classList.remove('show');}checkConflito();}}
+function onDataChange(){const d=document.getElementById('s-data')?.value||'';const venc=document.getElementById('s-vencimento')?.value||'';const box=document.getElementById('holiday-box'),bs=document.getElementById('leitura-banner-sol');if(!box)return;if(d&&venc&&d===venc){document.getElementById('s-data').value='';box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 Data Inválida</div><div style="font-size:12px;color:var(--erd)">Não é possível agendar no dia do vencimento.</div></div>`;if(bs)bs.classList.remove('show');checkConflito();return;}if(!d){box.innerHTML='';if(bs)bs.classList.remove('show');checkConflito();return;}const f=isFeriado(d);if(f){box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 ${f.tipo==='Fim de semana'?'Fim de semana':'Feriado'}</div><div style="font-size:12px;color:var(--erd)">${f.nome}</div></div>`;if(bs)bs.classList.remove('show');}else{box.innerHTML='';if(bs){if(isPeriodoLeitura(d))bs.classList.add('show');else bs.classList.remove('show');}checkConflito();}}
 function onVencimentoChange(){const venc=document.getElementById('s-vencimento').value;const data=document.getElementById('s-data').value;if(venc&&data&&venc===data){document.getElementById('s-data').value='';toast('Não é possível agendar no dia do vencimento');onDataChange();}if(typeof sugerirMelhorDataIA==='function')sugerirMelhorDataIA();}
+
+function onTipoChange(){const t=document.getElementById('s-tipo').value;document.getElementById('ln-fields').style.display=(t==='LN')?'block':'none';updateEquipeOptions();}
+function toggleLnBt(){document.getElementById('ln-bt-nota-wrap').style.display=document.getElementById('s-ln-bt').checked?'block':'none';}
+
+let escalasEquipes=[];
+function addEscala(){const e=document.getElementById('esc-equipe').value,i=document.getElementById('esc-inicio').value,f=document.getElementById('esc-fim').value,m=document.getElementById('esc-motivo').value;if(!e||!i||!f||!m){toast('Preencha tudo');return;}escalasEquipes.push({equipe:e,inicio:i,fim:f,motivo:m});save();renderEscalas();toast('Escala salva!');}
+function renderEscalas(){const el=document.getElementById('list-escalas');if(!el)return;if(!escalasEquipes.length){el.innerHTML='<div class="empty">Nenhuma ausência.</div>';return;}el.innerHTML=escalasEquipes.map((s,i)=>`<div class="card" style="padding:10px;margin-bottom:8px;border-left:4px solid var(--er)"><div style="display:flex;justify-content:space-between"><strong>${s.equipe}</strong><button onclick="excluirEscala(${i})" style="background:none;border:none;color:var(--er);cursor:pointer">✕</button></div><div style="font-size:11px;color:var(--text2)">${fmtD(s.inicio)} até ${fmtD(s.fim)}</div><div style="font-size:12px;margin-top:4px">Motivo: ${s.motivo}</div></div>`).join('');}
+function excluirEscala(i){escalasEquipes.splice(i,1);save();renderEscalas();}
+function isEquipeDisponivel(eq,data){if(!data)return true;return!escalasEquipes.some(s=>s.equipe===eq&&data>=s.inicio&&data<=s.fim);}
+function updateEscEquipeOptions(){const reg=document.getElementById('esc-reg')?.value;const el=document.getElementById('esc-equipe');if(!el)return;if(!reg){el.innerHTML='<option value="">Selecione Regional</option>';return;}const eqs=getEquipesByReg(reg);el.innerHTML=eqs.map(e=>`<option value="${e.nome}">${e.nome}</option>`).join('');}
+
 function sugerirMelhorDataIA(){
   console.log("IA: Iniciando cálculo...");
   const reg=document.getElementById('s-reg')?.value;
@@ -771,15 +790,16 @@ function sugerirMelhorDataIA(){
     box.innerHTML='<div class="hint hint-wn">IA: Nenhuma data disponível nos próximos dias.</div>';
   }
 }
+
 window.aplicarSugestaoIA=function(data,equipe){document.getElementById('s-data').value=data;if(equipe){const sel=document.getElementById('s-equipe');let hasEq=false;for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===equipe)hasEq=true;}if(hasEq)sel.value=equipe;}onDataChange();checkConflito();toast('Sugestão aplicada!');}
 
-async function enviarSol(){const reg=document.getElementById('s-reg').value,tipo=document.getElementById('s-tipo').value,data=document.getElementById('s-data').value,cid=document.getElementById('s-cidade').value,obs=document.getElementById('s-obs').value,per=document.getElementById('s-periodo').value,venc=document.getElementById('s-vencimento').value;if(!reg||!tipo||!data||!cid||!obs||!per||!venc){toast('Preencha obrigatórios (*)');return;}if(data===venc){toast('Não é possível agendar no dia do vencimento');return;}if(isFeriado(data,cid)){toast('Não é possível agendar neste dia (Feriado)');return;}if(!currentUser)return;solicitacoes.push({id:Date.now(),regional:reg,nota:document.getElementById('s-nota').value,vencimento:venc,cliente:document.getElementById('s-cliente').value,tipo,obs,data,periodo:normPer(per),cidade:cid.toUpperCase(),equipe:document.getElementById('s-equipe').value,analista:currentUser.name,analista_email:currentUser.email,contato:formState.contato,isMT:formState.isMT,isBT0:formState.isBT0,nsStatus:formState.nsStatus||'',status:'pendente',devolutiva:'',msg_devolutiva:'',ts:new Date().toISOString(),comentario:document.getElementById('s-comentario').value});save();limparSol();toast('Enviada!');}
+async function enviarSol(){const reg=document.getElementById('s-reg').value,tipo=document.getElementById('s-tipo').value,data=document.getElementById('s-data').value,cid=document.getElementById('s-cidade').value,obs=document.getElementById('s-obs').value,per=document.getElementById('s-periodo').value,venc=document.getElementById('s-vencimento').value,lnBt=document.getElementById('s-ln-bt').checked,lnNotaBt=document.getElementById('s-ln-nota-bt').value;if(!reg||!tipo||!data||!cid||!obs||!per||!venc){toast('Preencha obrigatórios (*)');return;}if(tipo==='LN'&&lnBt&&!lnNotaBt){toast('Informe a nota BT');return;}if(data===venc){toast('Não é possível agendar no dia do vencimento');return;}if(isFeriado(data,cid)){toast('Não é possível agendar neste dia (Feriado)');return;}if(!currentUser)return;solicitacoes.push({id:Date.now(),regional:reg,nota:document.getElementById('s-nota').value,vencimento:venc,cliente:document.getElementById('s-cliente').value,tipo,obs,data,periodo:normPer(per),cidade:cid.toUpperCase(),equipe:document.getElementById('s-equipe').value,analista:currentUser.name,analista_email:currentUser.email,contato:formState.contato,isMT:formState.isMT,isBT0:formState.isBT0,nsStatus:formState.nsStatus||'',status:'pendente',devolutiva:'',msg_devolutiva:'',ts:new Date().toISOString(),comentario:document.getElementById('s-comentario').value,acompanhaBT:lnBt,notaBT:lnNotaBt});save();limparSol();toast('Enviada!');}
 
 function limparSol(){['s-reg','s-tipo','s-periodo','s-equipe'].forEach(id=>{const s=document.getElementById(id);if(s)s.value='';});['s-nota','s-data','s-cidade','s-obs','s-cliente','s-comentario','s-vencimento'].forEach(id=>{const s=document.getElementById(id);if(s)s.value='';});document.getElementById('holiday-box').innerHTML='';document.getElementById('conflito-box').innerHTML='';document.getElementById('tempo-estimado').innerHTML='';document.getElementById('equipe-hint').innerHTML='';const aiBox=document.getElementById('ai-sugg-box');if(aiBox)aiBox.innerHTML='';formState={contato:true,isMT:false,isBT0:false,nsStatus:null};setContato(true);setToggle('mt',false);setToggle('bt0',false);setNsStatus(null);}
 
 function renderSols(){const el=document.getElementById('list-sols');if(!el)return;const f=document.getElementById('sol-filtro')?.value||'';const list=f?solicitacoes.filter(x=>x.status===f):solicitacoes;if(!list.length){el.innerHTML='<div class="empty">Nenhuma</div>';return;}el.innerHTML=[...list].reverse().map(s=>{const i=solicitacoes.findIndex(x=>x.id===s.id);return`<div class="sol-item ${s.status}"><div class="sol-header"><div style="flex:1"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="badge b-navy">${s.regional}</span>${tipoBadge(s.tipo)}${s.isMT?'<span class="badge b-info" style="font-size:10px">MT</span>':''}${s.isBT0?'<span class="badge b-ok" style="font-size:10px">BT0</span>':''}${s.nsStatus?nsBadge(s.nsStatus):''}<span style="font-size:13px;font-weight:600">${s.cidade} — ${fmtD(s.data)} ${s.periodo}</span></div><div style="font-size:12px"><div><b>Analista:</b> ${s.analista}</div><div><b>Nota:</b> ${s.nota||'—'} | <b>Vencimento:</b> ${s.vencimento?fmtD(s.vencimento):'—'} | <b>Cliente:</b> ${s.cliente||'—'}</div><div><b>Serviço:</b> ${s.obs}</div><div><b>Equipe:</b> <span style="color:var(--blue);font-weight:600">${s.equipe||'Nenhuma'}</span></div>${s.comentario?`<div style="margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)"><i>${escHtml(s.comentario)}</i></div>`:''}</div></div><div class="sol-actions">${s.status==='pendente'?`<button class="btn btn-sm btn-g" onclick="confirmarDev(${i})">Confirmar</button><button class="btn btn-sm" style="color:var(--wn);border-color:var(--wn)" onclick="document.getElementById('dev-${s.id}').classList.toggle('show')">Reagendar</button>`:`<span class="badge ${s.status==='confirmado'?'b-ok':'b-wn'}">${s.status.toUpperCase()}</span>`}<button class="btn btn-sm" style="color:var(--er);margin-top:10px" onclick="excluirSol(${i})">Excluir</button></div></div><div class="dev-box" id="dev-${s.id}"><textarea id="dmsg-${s.id}" placeholder="Motivo..." style="width:100%;min-height:60px;margin-bottom:8px"></textarea><button class="btn btn-p btn-sm" onclick="enviarDev(${i})">Enviar</button></div></div>`;}).join('');}
 
-async function confirmarDev(i){const s=solicitacoes[i];solicitacoes[i]={...s,status:'confirmado',devolutiva:'confirmado',msg_devolutiva:'OK'};agend.push({id:Date.now(),regional:s.regional,nota:s.nota||'',vencimento:s.vencimento||'',cliente:s.cliente||'',tipo:s.tipo,obs:s.obs,data:s.data,periodo:s.periodo,cidade:s.cidade,confirmado:'SIM',equipe:s.equipe||'',isMT:s.isMT||false,isBT0:s.isBT0||false,nsStatus:s.nsStatus||''});save();toast('Confirmado!');}
+async function confirmarDev(i){const s=solicitacoes[i];solicitacoes[i]={...s,status:'confirmado',devolutiva:'confirmado',msg_devolutiva:'OK'};agend.push({id:Date.now(),regional:s.regional,nota:s.nota||'',vencimento:s.vencimento||'',cliente:s.cliente||'',tipo:s.tipo,obs:s.obs,data:s.data,periodo:s.periodo,cidade:s.cidade,confirmado:'SIM',equipe:s.equipe||'',isMT:s.isMT||false,isBT0:s.isBT0||false,nsStatus:s.nsStatus||''});save();toast('Confirmado!');notifyUser("Nota Confirmada! ✅", `A nota ${s.nota} para ${s.cidade} foi confirmada.`);}
 async function enviarDev(i){const s=solicitacoes[i],msg=document.getElementById(`dmsg-${s.id}`).value;if(!msg){toast('Preencha devolutiva');return;}solicitacoes[i]={...s,status:'reagendar',devolutiva:'reagendar',msg_devolutiva:msg};save();toast('Enviada!');}
 function excluirSol(i){solicitacoes.splice(i,1);save();}
 
@@ -795,12 +815,72 @@ function renderEmailListas(){const el=document.getElementById('em-listas');if(!e
 function salvarCredenciais(){const u=document.getElementById('cfg-user').value.trim(),p=document.getElementById('cfg-pass').value;creds.user=u;if(p)creds.pass=p;save();toast('Salvo!');}
 function loadCfgUI(){if(creds.user){const el=document.getElementById('cfg-user');if(el)el.value=creds.user;}}
 function renderRotas(){const el=document.getElementById('rotas-list');if(!el)return;const reg=document.getElementById('d-reg')?.value;const hj=new Date();const proximos=Array.from({length:7},(_,i)=>dataLocal(new Date(hj.getFullYear(),hj.getMonth(),hj.getDate()+i)));const agendsReg=agend.filter(a=>(!reg||a.regional===reg)&&proximos.includes(a.data));if(!agendsReg.length){el.innerHTML='<div class="empty">Nenhum agendamento para os próximos 7 dias.</div>';return;}let h='';proximos.forEach(d=>{const diaAgends=agendsReg.filter(a=>a.data===d);if(!diaAgends.length)return;h+=`<div style="margin-bottom:15px"><div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">📅 ${fmtD(d)} <span style="font-weight:400;font-size:11px;color:var(--text2)">(${diaAgends.length} notas)</span></div>`;const porCidade={};diaAgends.forEach(a=>{const c=a.cidade.toUpperCase();if(!porCidade[c])porCidade[c]=[];porCidade[c].push(a);});Object.entries(porCidade).forEach(([cid,list])=>{const eqs=[...new Set(list.map(a=>a.equipe))];h+=`<div class="rota-item"><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--navy)">${cid}</div><div style="font-size:11px;color:var(--text2)">${list.length} nota(s) • Equipes: <span style="color:var(--blue);font-weight:600">${eqs.join(', ')}</span></div></div><button class="btn btn-sm btn-p" onclick="document.getElementById('s-cidade').value='${cid}';goTab('solicitar');onCidadeChange();">Agendar aqui</button></div>`;});h+='</div>';});el.innerHTML=h;}
-let myCharts={};
-function renderCharts(){if(typeof Chart==='undefined')return;const ctxR=document.getElementById('chart-regional');const ctxS=document.getElementById('chart-status');const ctxD=document.getElementById('chart-demanda');if(!ctxR||!ctxS||!ctxD)return;if(myCharts.reg)myCharts.reg.destroy();if(myCharts.status)myCharts.status.destroy();if(myCharts.demanda)myCharts.demanda.destroy();const regData=REGIONAIS.map(r=>agend.filter(a=>a.regional===r).length);myCharts.reg=new Chart(ctxR,{type:'bar',data:{labels:REGIONAIS,datasets:[{label:'Agendamentos',data:regData,backgroundColor:'#1e7fd4',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});const st={Conf:agend.filter(a=>a.confirmado).length,Pend:solicitacoes.filter(s=>s.status==='pendente').length,Reag:solicitacoes.filter(s=>s.status==='reagendar').length};myCharts.status=new Chart(ctxS,{type:'doughnut',data:{labels:['Confirmados','Pendentes','Reagendar'],datasets:[{data:[st.Conf,st.Pend,st.Reag],backgroundColor:['#4dbb6e','#1e7fd4','#e08020'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}}}});const months=Array.from({length:6},(_,i)=>{const d=new Date();d.setMonth(d.getMonth()-i);return d.toISOString().slice(0,7);}).reverse();const dData=months.map(m=>demandaAF.filter(a=>a.mes===m).length);const aData=months.map(m=>agend.filter(a=>a.data.startsWith(m)).length);myCharts.demanda=new Chart(ctxD,{type:'line',data:{labels:months,datasets:[{label:'Demanda AF',data:dData,borderColor:'#7c3aed',backgroundColor:'#7c3aed',tension:0.3,fill:true,backgroundColor:'rgba(124,58,237,0.1)'},{label:'Realizado',data:aData,borderColor:'#4dbb6e',backgroundColor:'#4dbb6e',tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});}
+let mapInstance = null;
+const CID_COORDS = {
+  'SJC': [-23.189, -45.884], 'SAO JOSE DOS CAMPOS': [-23.189, -45.884],
+  'JACAREI': [-23.305, -45.965], 'TAUBATE': [-23.021, -45.559],
+  'PINDAMONHANGABA': [-22.923, -45.457], 'CACAPAVA': [-23.102, -45.707],
+  'TREMBE': [-22.956, -45.549], 'GUARATINGUETA': [-22.813, -45.191],
+  'LORENA': [-22.739, -45.120], 'CRUZEIRO': [-22.573, -44.970],
+  'CARAGUATATUBA': [-23.622, -45.412], 'SAO SEBASTIAO': [-23.760, -45.411],
+  'GUARULHOS': [-23.462, -46.533], 'SUZANO': [-23.537, -46.312],
+  'POA': [-23.530, -46.347], 'ITAQUAQUECETUBA': [-23.486, -46.348],
+  'FERRAZ DE VASCONCELOS': [-23.541, -46.368], 'MOGI DAS CRUZES': [-23.520, -46.185]
+};
+
+function renderMapa(){
+  if(activeTab !== 'mapa') return;
+  if(!mapInstance){
+    mapInstance = L.map('main-map').setView([-23.2, -45.9], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(mapInstance);
+  }
+  
+  // Limpar marcadores anteriores (idealmente usar LayerGroup)
+  mapInstance.eachLayer(layer => { if(layer instanceof L.Marker) mapInstance.removeLayer(layer); });
+
+  const hj = dataLocal(new Date());
+  const diaAgends = agend.filter(a => a.data === hj);
+  
+  diaAgends.forEach(a => {
+    const coords = CID_COORDS[a.cidade.toUpperCase()] || CID_COORDS[a.regional];
+    if(coords){
+      const color = a.confirmado ? '#1e7fd4' : '#e08020';
+      const markerHtml = `<div style="background-color:${color}; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4)"></div>`;
+      const icon = L.divIcon({ html: markerHtml, className: '', iconSize: [12, 12] });
+      
+      L.marker(coords, { icon })
+       .bindPopup(`<b>${a.equipe || 'Sem Equipe'}</b><br>${a.cidade}<br>${a.tipo} - ${a.periodo}<br><small>${a.cliente}</small>`)
+       .addTo(mapInstance);
+    }
+  });
+  
+  // Auto-ajuste do zoom
+  setTimeout(() => mapInstance.invalidateSize(), 200);
+}
+function renderCharts(){if(typeof Chart==='undefined')return;const ctxR=document.getElementById('chart-regional');const ctxS=document.getElementById('chart-status');const ctxD=document.getElementById('chart-demanda');const ctxRK=document.getElementById('chart-ranking');if(!ctxR||!ctxS||!ctxD||!ctxRK)return;if(myCharts.reg)myCharts.reg.destroy();if(myCharts.status)myCharts.status.destroy();if(myCharts.demanda)myCharts.demanda.destroy();if(myCharts.ranking)myCharts.ranking.destroy();const isDark=document.documentElement.getAttribute('data-theme')==='dark';const tColor=isDark?'#f1f5f9':'#1a2332';const bColor=isDark?'#334155':'#e2e8f0';const regData=REGIONAIS.map(r=>agend.filter(a=>a.regional===r).length);myCharts.reg=new Chart(ctxR,{type:'bar',data:{labels:REGIONAIS,datasets:[{label:'Agendamentos',data:regData,backgroundColor:'#1e7fd4',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tColor},grid:{display:false}},y:{ticks:{color:tColor},grid:{color:bColor},beginAtZero:true}}}});const st={Conf:agend.filter(a=>a.confirmado).length,Pend:solicitacoes.filter(s=>s.status==='pendente').length,Reag:solicitacoes.filter(s=>s.status==='reagendar').length};myCharts.status=new Chart(ctxS,{type:'doughnut',data:{labels:['Confirmados','Pendentes','Reagendar'],datasets:[{data:[st.Conf,st.Pend,st.Reag],backgroundColor:['#4dbb6e','#1e7fd4','#e08020'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:tColor,boxWidth:12,font:{size:11}}}}}});const months=Array.from({length:6},(_,i)=>{const d=new Date();d.setMonth(d.getMonth()-i);return d.toISOString().slice(0,7);}).reverse();const dData=months.map(m=>demandaAF.filter(a=>a.mes===m).length);const aData=months.map(m=>agend.filter(a=>a.data.startsWith(m)).length);myCharts.demanda=new Chart(ctxD,{type:'line',data:{labels:months,datasets:[{label:'Demanda AF',data:dData,borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.1)',tension:0.3,fill:true},{label:'Realizado',data:aData,borderColor:'#4dbb6e',backgroundColor:'#4dbb6e',tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tColor}}},scales:{x:{ticks:{color:tColor},grid:{color:bColor}},y:{ticks:{color:tColor},grid:{color:bColor},beginAtZero:true}}}});const eqCounts={};agend.filter(a=>a.confirmado).forEach(a=>{if(a.equipe){eqCounts[a.equipe]=(eqCounts[a.equipe]||0)+1;}});const sortedEqs=Object.entries(eqCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);myCharts.ranking=new Chart(ctxRK,{type:'bar',data:{labels:sortedEqs.map(e=>e[0]),datasets:[{label:'Notas Concluídas',data:sortedEqs.map(e=>e[1]),backgroundColor:'#4dbb6e',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tColor},grid:{color:bColor},beginAtZero:true},y:{ticks:{color:tColor},grid:{display:false}}}}});}
 function exportarExcel(){if(!window.currentFilteredData||!window.currentFilteredData.length){toast('Nada para exportar');return;}const exportData=window.currentFilteredData.map(a=>({Regional:a.regional,Nota:a.nota,Cliente:a.cliente,Tipo:a.tipo,Serviço:a.obs,Data:a.data,Período:a.periodo,Cidade:a.cidade,Equipe:a.equipe,Analista:a.analista||'',MT:a.isMT?'SIM':'NÃO',BT0:a.isBT0?'SIM':'NÃO',Status:a.confirmado?'Confirmado':'Pendente'}));const ws=XLSX.utils.json_to_sheet(exportData);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Agendamentos");XLSX.writeFile(wb,`Relatorio_Logistica_${dataLocal(new Date())}.xlsx`);}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3200);}
 
-// PWA Register
+function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    toast("Este navegador não suporta notificações.");
+    return;
+  }
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      toast("Notificações ativadas!");
+      new Notification("EDP Agenda", { body: "Você agora receberá alertas de confirmação.", icon: "logo.png" });
+    }
+  });
+}
+
+function notifyUser(title, body) {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body: body, icon: "logo.png" });
+  }
+}
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('install-btn');if(b)b.style.display='block';});
 async function installApp(){if(deferredPrompt){deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;deferredPrompt=null;const b=document.getElementById('install-btn');if(b)b.style.display='none';}}
