@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edp-agenda-v8';
+const CACHE_NAME = 'edp-agenda-v9';
 const ASSETS = [
   'index.html',
   'original.html',
