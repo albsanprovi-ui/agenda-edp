@@ -190,14 +190,14 @@ tr:hover td{background:#f8f9fb}
 .debug-box{background:#1a1a2e;color:#a0f0a0;border:1px solid #333;border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:11px;max-height:220px;overflow-y:auto;display:none}
 .debug-box.show{display:block}
 
-.af-heatmap-wrap { overflow-x: auto; margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
-.af-heatmap { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
-.af-heatmap th, .af-heatmap td { padding: 6px 2px; text-align: center; border: 1px solid var(--border); min-width: 28px; }
+.af-heatmap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+.af-heatmap { border-collapse: collapse; font-size: 11px; }
+.af-heatmap th, .af-heatmap td { padding: 6px 4px; text-align: center; border: 1px solid var(--border); min-width: 32px; }
 .af-heatmap .day-hdr { background: #f8f9fb; font-weight: 700; font-size: 10px; height: 40px; }
 .af-heatmap .day-hdr.ws { background: #f1f5f9; color: #94a3b8; }
 .af-heatmap .day-hdr.fer { background: #fee2e2; color: #ef4444; }
 .af-heatmap .day-hdr.leit { background: #fef3c7; color: #d97706; }
-.af-heatmap .eq-cell { text-align: left; padding: 6px 10px; font-weight: 600; background: #f8f9fb; position: sticky; left: 0; z-index: 2; width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.af-heatmap .eq-cell { text-align: left; padding: 6px 10px; font-weight: 600; background: #f8f9fb; position: sticky; left: 0; z-index: 2; white-space: nowrap; min-width: 130px; }
 .hcell { height: 32px; font-weight: 700; transition: transform 0.1s; }
 .hcell:hover { transform: scale(1.1); z-index: 5; position: relative; cursor: default; }
 .hcell.h0 { background: #f0fdf4; color: #166534; }
@@ -225,6 +225,13 @@ tr:hover td{background:#f8f9fb}
   .filters select,.filters input{width:100%}
   .topbar{padding:.6rem 1rem}
   .main{padding:1rem .75rem}
+  /* iOS Safari não lida bem com position:sticky em células de tabela quando border-collapse:collapse é usado,
+     o que fazia as colunas do heatmap se sobreporem ("encavalar"). Em telas pequenas, tiramos o sticky
+     e usamos bordas separadas para o scroll horizontal funcionar normalmente. */
+  .af-heatmap{border-collapse:separate;border-spacing:0;font-size:10px}
+  .af-heatmap th,.af-heatmap td{padding:5px 3px;min-width:26px;border:1px solid var(--border);position:static!important}
+  .af-heatmap .eq-cell{min-width:104px;padding:5px 8px}
+  .af-heatmap thead th.day-hdr{min-width:26px}
 }
 
 .t-bell-wrap{position:relative;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:50%;border:1px solid var(--border);transition:all .2s}.t-bell-wrap:hover{background:#e2e8f0}.t-bell-badge{position:absolute;top:-2px;right:-2px;background:#e11d48;color:#fff;font-size:10px;font-weight:800;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:10px;padding:0 4px;border:2px solid #fff}
@@ -444,7 +451,7 @@ tr:hover td{background:#f8f9fb}
           <div class="sec">nova solicitação</div>
           <div class="g2"><div class="fr"><label>Regional *</label><select id="s-reg" style="width:100%" onchange="onRegChange(); sugerirMelhorDataIA();"><option value="">Selecione...</option></select></div><div class="fr"><label>Tipo *</label><select id="s-tipo" style="width:100%" onchange="onTipoChange(); sugerirMelhorDataIA();"><option value="">Selecione...</option></select></div></div>
           <div class="g2"><div class="fr"><label>Nota</label><input type="text" id="s-nota" style="width:100%"></div><div class="fr"><label>Vencimento da Nota *</label><input type="date" id="s-vencimento" style="width:100%" onchange="onVencimentoChange()"></div></div>
-          <div class="g2"><div class="fr"><label>Período *</label><select id="s-periodo" style="width:100%" onchange="checkConflito()"><option value="">Selecione...</option><option>09h</option><option>14h</option></select><div class="ln-warn" id="ln-periodo-warn">⏰ Notas LN — somente período da manhã (09h)</div></div><div class="fr"><label>Cidade *</label><input type="text" id="s-cidade" style="width:100%" oninput="onCidadeChange()"></div></div>
+          <div class="g2"><div class="fr"><label>Período *</label><select id="s-periodo" style="width:100%" onchange="updateEquipeOptions()"><option value="">Selecione...</option><option>09h</option><option>14h</option></select><div class="ln-warn" id="ln-periodo-warn">⏰ Notas LN — somente período da manhã (09h)</div></div><div class="fr"><label>Cidade *</label><input type="text" id="s-cidade" style="width:100%" oninput="onCidadeChange()"></div></div>
           <div class="fr"><label>Cliente</label><input type="text" id="s-cliente" style="width:100%"></div>
           <div class="field-divider">📞 Atendimento</div>
           <div class="fr"><label>Contato com cliente?</label><div class="toggle-group"><div class="toggle-opt sel-sim" id="opt-sim" onclick="setContato(true)"><div class="toggle-dot"></div>Sim</div><div class="toggle-opt" id="opt-nao" onclick="setContato(false)"><div class="toggle-dot"></div>Não</div></div></div>
@@ -699,8 +706,8 @@ function startApp(){
   checkAlarmes();
 }
 const ATABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'solicitar',l:'Solicitar'},{id:'minhas',l:'Minhas'},{id:'chat',l:'Chat 💬'}];
-const GTABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa Logístico 📍'},{id:'solicitacoes',l:'Solicitações'},{id:'dashboard',l:'Dashboard 📊'},{id:'upload',l:'Gestão'},{id:'chat',l:'Chat 💬'}];
-const STABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'mapa',l:'Mapa Logístico 📍'},{id:'dashboard',l:'Dashboard 📊'}];
+const GTABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'},{id:'solicitacoes',l:'Solicitações'},{id:'upload',l:'Gestão'},{id:'chat',l:'Chat 💬'}];
+const STABS=[{id:'agendamentos',l:'Agendamentos'},{id:'disponibilidade',l:'Disponibilidade'}];
 let mensagens={};let chatUnread={};let chatConversaAtual='';
 function slugEmail(e){return(e||'anonimo').replace(/[@.]/g,'_');}
 function renderTabs(){if(!currentUser)return;const tabs=currentUser.role==='programador'?GTABS:(currentUser.role==='supervisao'?STABS:ATABS);const tu=Object.values(chatUnread).reduce((a,b)=>a+b,0);document.getElementById('tabs').innerHTML=tabs.map(t=>{const badge=(t.id==='chat'&&tu>0&&activeTab!=='chat')?`<span class="chat-badge">${tu>9?'9+':tu}</span>`:'';return`<div class="tab${t.id===activeTab?' on':''}" onclick="goTab('${t.id}')">${t.l}${badge}</div>`;}).join('');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));const ap=document.getElementById('panel-'+activeTab);if(ap)ap.classList.add('on');renderAll();}
@@ -956,9 +963,9 @@ function renderDatas(){const reg=document.getElementById('d-reg')?.value||'',el=
 
 function renderEquipes(){const reg=document.getElementById('e-reg')?.value||'',dt=document.getElementById('e-data')?.value,el=document.getElementById('list-equipes');if(!el)return;if(!reg){el.innerHTML='<div class="empty">Selecione</div>';return;}let eqs=getEquipesByReg(reg);if(dt){const ho=agend.filter(a=>a.regional===reg&&a.data===dt);eqs=eqs.map(e=>{const dq=ho.filter(x=>x.equipe===e.nome);return{...e,ocup:dq.length,agends:dq};});}el.innerHTML=eqs.map(e=>`<div class="team-card"><div class="team-header"><div class="av">${e.nome.slice(-2)}</div><div style="flex:1"><div class="tn">${e.nome}</div><div class="ts">${e.spec}</div></div>${dt?`<div style="font-size:11px;font-weight:600;color:${e.ocup>0?'var(--wnd)':'var(--okd)'};background:${e.ocup>0?'var(--wnl)':'var(--okl)'};padding:3px 8px;border-radius:6px">${e.ocup}</div>`:''}</div>${dt&&e.agends&&e.agends.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${e.agends.map(a=>`<div style="font-size:11px;color:var(--text2);margin-bottom:3px;display:flex;justify-content:space-between"><span>${tipoBadge(a.tipo)} ${a.cidade}</span><span style="font-weight:600">${a.periodo}</span></div>`).join('')}</div>`:''}</div>`).join('');}
 
-function updateEquipeOptions(){const reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',cid=document.getElementById('s-cidade')?.value||'',el=document.getElementById('s-equipe'),h=document.getElementById('equipe-hint');if(!el||!h)return;const data=document.getElementById('s-data')?.value;const sg=sugerirEquipe(reg,tipo,cid,formState.isMT,formState.isBT0,data);if(!reg||!tipo){el.innerHTML='<option value="">— automático —</option>';h.innerHTML='';checkConflito();return;}if(!sg.length){el.innerHTML='<option value="">Nenhuma</option>';h.innerHTML=`<div class="hint hint-wn">⚠️ Verifique MT/BT0/Cidade/Escala.</div>`;}else{const pv=el.value;el.innerHTML='<option value="">— automático —</option>'+sg.map(e=>`<option value="${e.nome}">${e.nome} — ${e.spec}</option>`).join('');el.value=sg.find(x=>x.nome===pv)?pv:sg[0].nome;h.innerHTML=`<div class="hint hint-ok">✓ ${sg.length} equipe(s).</div>`;}checkConflito();sugerirMelhorDataIA();}
+function updateEquipeOptions(){const reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',cid=document.getElementById('s-cidade')?.value||'',el=document.getElementById('s-equipe'),h=document.getElementById('equipe-hint');if(!el||!h)return;const data=document.getElementById('s-data')?.value;const periodo=document.getElementById('s-periodo')?.value||'09h';const sg=getEquipesLivres(reg,tipo,cid,data,periodo,formState.isMT,formState.isBT0);if(!reg||!tipo){el.innerHTML='<option value="">— automático —</option>';h.innerHTML='';checkConflito();return;}if(!sg.length){el.innerHTML='<option value="">Nenhuma equipe livre neste período</option>';h.innerHTML=`<div class="hint hint-wn">⚠️ Nenhuma equipe livre.</div>`;}else{const pv=el.value;el.innerHTML='<option value="">— automático —</option>'+sg.map(e=>`<option value="${e.nome}">${e.nome} — ${e.spec}</option>`).join('');if(sg.find(x=>x.nome===pv)){el.value=pv;}else{el.value='';}h.innerHTML=`<div class="hint hint-ok">✓ ${sg.length} equipe(s) livre(s).</div>`;}checkConflito();sugerirMelhorDataIA();}
 
-function onDataChange(){const d=document.getElementById('s-data')?.value||'';const venc=document.getElementById('s-vencimento')?.value||'';const box=document.getElementById('holiday-box'),bs=document.getElementById('leitura-banner-sol');if(!box)return;if(d&&venc&&d===venc){document.getElementById('s-data').value='';box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 Data Inválida</div><div style="font-size:12px;color:var(--erd)">Não é possível agendar no dia do vencimento.</div></div>`;if(bs)bs.classList.remove('show');checkConflito();return;}if(!d){box.innerHTML='';if(bs)bs.classList.remove('show');checkConflito();return;}const f=isFeriado(d);if(f){box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 ${f.tipo==='Fim de semana'?'Fim de semana':'Feriado'}</div><div style="font-size:12px;color:var(--erd)">${f.nome}</div></div>`;if(bs)bs.classList.remove('show');}else{box.innerHTML='';if(bs){if(isPeriodoLeitura(d))bs.classList.add('show');else bs.classList.remove('show');}checkConflito();}}
+function onDataChange(){const d=document.getElementById('s-data')?.value||'';const venc=document.getElementById('s-vencimento')?.value||'';const box=document.getElementById('holiday-box'),bs=document.getElementById('leitura-banner-sol');if(!box)return;if(d&&venc&&d===venc){document.getElementById('s-data').value='';box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 Data Inválida</div><div style="font-size:12px;color:var(--erd)">Não é possível agendar no dia do vencimento.</div></div>`;if(bs)bs.classList.remove('show');updateEquipeOptions();return;}if(!d){box.innerHTML='';if(bs)bs.classList.remove('show');updateEquipeOptions();return;}const f=isFeriado(d);if(f){box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 ${f.tipo==='Fim de semana'?'Fim de semana':'Feriado'}</div><div style="font-size:12px;color:var(--erd)">${f.nome}</div></div>`;if(bs)bs.classList.remove('show');}else{box.innerHTML='';if(bs){if(isPeriodoLeitura(d))bs.classList.add('show');else bs.classList.remove('show');}updateEquipeOptions();}}
 function onVencimentoChange(){const venc=document.getElementById('s-vencimento').value;const data=document.getElementById('s-data').value;if(venc&&data&&venc===data){document.getElementById('s-data').value='';toast('Não é possível agendar no dia do vencimento');onDataChange();}if(typeof sugerirMelhorDataIA==='function')sugerirMelhorDataIA();}
 function onTipoChange(){
   const t=document.getElementById('s-tipo').value;
@@ -1492,30 +1499,61 @@ function mostrarAgendamentosDia(ds){
   
   document.getElementById('modal-dia-overlay').classList.add('show');
   
+  let html = '';
   if(!list.length){
-    body.innerHTML = '<div class="empty">Nenhum agendamento para este dia nesta regional.</div>';
-    return;
-  }
-  
-  body.innerHTML = list.map(a => `
-    <div style="border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--bg)">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center">
-        <div>
-          <span class="badge b-navy">${a.regional}</span>
-          ${tipoBadge(a.tipo)}
+    html = '<div class="empty">Nenhum agendamento para este dia nesta regional.</div>';
+  } else {
+    html = list.map(a => `
+      <div style="border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--bg)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center">
+          <div>
+            <span class="badge b-navy">${a.regional}</span>
+            ${tipoBadge(a.tipo)}
+          </div>
+          <span class="badge b-gy">${a.periodo}</span>
         </div>
-        <span class="badge b-gy">${a.periodo}</span>
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${a.cidade}</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">
+          <b>Nota:</b> ${a.nota || '—'} | <b>Cliente:</b> ${a.cliente || '—'}
+        </div>
+        <div style="font-size:12px;color:var(--text2)">
+          <b>Equipe:</b> <span style="color:var(--blue);font-weight:600">${a.equipe || 'Nenhuma'}</span>
+        </div>
+        ${a.obs ? `<div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">Obs: ${a.obs}</div>` : ''}
       </div>
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px">${a.cidade}</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:6px">
-        <b>Nota:</b> ${a.nota || '—'} | <b>Cliente:</b> ${a.cliente || '—'}
+    `).join('');
+  }
+
+  const allEqs = getEquipesByReg(reg);
+  if(allEqs.length){
+    const eqStats = allEqs.map(e => {
+      const arr = list.filter(a => a.equipe === e.nome);
+      const m = arr.filter(a => normPer(a.periodo) === '09h').length;
+      const t = arr.filter(a => normPer(a.periodo) === '14h').length;
+      return { ...e, m, t };
+    });
+    html += `
+      <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
+        <div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:8px">Disponibilidade das Equipes (${allEqs.length})</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px">
+          ${eqStats.map(e => `
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:11px">
+              <div style="font-weight:700;margin-bottom:6px;color:var(--navy)">${e.nome}</div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                <span style="color:var(--text2)">Manhã:</span>
+                <span style="font-weight:600;color:${e.m>0?'var(--erd)':'var(--okd)'}">${e.m>0?'Ocupado':'Livre'}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--text2)">Tarde:</span>
+                <span style="font-weight:600;color:${e.t>0?'var(--erd)':'var(--okd)'}">${e.t>0?'Ocupado':'Livre'}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
       </div>
-      <div style="font-size:12px;color:var(--text2)">
-        <b>Equipe:</b> <span style="color:var(--blue);font-weight:600">${a.equipe || 'Nenhuma'}</span>
-      </div>
-      ${a.obs ? `<div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">Obs: ${a.obs}</div>` : ''}
-    </div>
-  `).join('');
+    `;
+  }
+  body.innerHTML = html;
 }
 function fecharModalDia(){
   document.getElementById('modal-dia-overlay').classList.remove('show');
