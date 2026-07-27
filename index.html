@@ -317,6 +317,115 @@ tr:hover td{background:#f8f9fb}
 .btn-sap.er{color:var(--er)}
 .btn-sap.no{color:var(--text3);opacity:.4;cursor:not-allowed}
 
+/* ===== CAMPO CONTATO CLIENTE ===== */
+.contato-cliente-wrap {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: max-height 0.35s ease, opacity 0.3s ease, transform 0.3s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+.contato-cliente-wrap.show {
+  max-height: 120px;
+  opacity: 1;
+  transform: translateY(0);
+  margin-top: 10px;
+}
+.contato-cliente-wrap .fr {
+  margin-bottom: 0;
+}
+.contato-obrig-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b91c1c;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 4px;
+}
+.contato-obrig-label::after {
+  content: '— OBRIGATÓRIO';
+  font-size: 9px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+#s-contato-cliente {
+  border-color: #fca5a5 !important;
+  background: #fff5f5 !important;
+}
+#s-contato-cliente:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+#s-contato-cliente.valid {
+  border-color: #86efac !important;
+  background: #f0fdf4 !important;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+
+/* ===== AF CAPACITY BOX ===== */
+.af-cap-box {
+  margin-top: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 11px;
+}
+.af-cap-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+}
+.af-cap-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 7px;
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.af-cap-row.ok {
+  background: #f0fdf4;
+  color: #065f46;
+  border: 1px solid #bbf7d0;
+}
+.af-cap-row.warn {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.af-cap-row.full {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  opacity: .75;
+}
+.af-cap-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+.af-cap-row.ok .af-cap-badge   { background: #dcfce7; color: #166534; }
+.af-cap-row.warn .af-cap-badge { background: #fef3c7; color: #92400e; }
+.af-cap-row.full .af-cap-badge { background: #fee2e2; color: #991b1b; }
+
 /* ===== SPLASH SCREEN ===== */
 #splash-screen {
   position: fixed;
@@ -613,7 +722,13 @@ tr:hover td{background:#f8f9fb}
           <div class="fr"><label>Cliente</label><input type="text" id="s-cliente" style="width:100%"></div>
           <div class="field-divider">📞 Atendimento</div>
           <div class="fr"><label>Contato com cliente?</label><div class="toggle-group"><div class="toggle-opt sel-sim" id="opt-sim" onclick="setContato(true)"><div class="toggle-dot"></div>Sim</div><div class="toggle-opt" id="opt-nao" onclick="setContato(false)"><div class="toggle-dot"></div>Não</div></div></div>
-          <div class="g2"><div class="fr"><label>Data *</label><input type="date" id="s-data" style="width:100%" onchange="onDataChange()"><div id="ai-sugg-box"></div><div id="holiday-box"></div><div class="leitura-banner" id="leitura-banner-sol" style="margin-top:8px"><div class="leitura-banner-icon">📖</div><div class="leitura-banner-body"><div class="leitura-banner-title">Período de Leitura</div><div class="leitura-banner-text">5 primeiros dias úteis do mês.</div></div></div></div><div class="fr"><label>Equipe sugerida</label><select id="s-equipe" style="width:100%" onchange="checkConflito()"><option value="">— automático —</option></select><div id="equipe-hint"></div><div id="conflito-box"></div></div></div>
+          <div class="contato-cliente-wrap" id="contato-cliente-wrap">
+            <div class="fr">
+              <div class="contato-obrig-label">📞 Contato do cliente</div>
+              <input type="text" id="s-contato-cliente" placeholder="Telefone ou observação sobre a tentativa de contato" style="width:100%" oninput="this.classList.toggle('valid', this.value.trim().length>0)">
+            </div>
+          </div>
+          <div class="g2"><div class="fr"><label>Data *</label><input type="date" id="s-data" style="width:100%" onchange="onDataChange()"><div id="ai-sugg-box"></div><div id="holiday-box"></div><div class="leitura-banner" id="leitura-banner-sol" style="margin-top:8px"><div class="leitura-banner-icon">📖</div><div class="leitura-banner-body"><div class="leitura-banner-title">Período de Leitura</div><div class="leitura-banner-text">5 primeiros dias úteis do mês.</div></div></div></div><div class="fr"><label>Equipe sugerida</label><select id="s-equipe" style="width:100%" onchange="checkConflito()"><option value="">— automático —</option></select><div id="equipe-hint"></div><div id="conflito-box"></div><div id="af-capacity-box"></div></div></div>
           <div class="fr"><label>Serviço *</label><input type="text" id="s-obs" style="width:100%" oninput="atualizarTempoEstimado()"></div>
           
           <div id="ln-fields" style="display:none; background:var(--bg); padding:12px; border-radius:10px; margin-bottom:15px; border:1px dashed var(--border)">
@@ -1133,8 +1248,7 @@ function sugerirEquipe(reg,tipo,cid,isMT,isBT0,data){
   if(data)eqs=eqs.filter(e=>isEquipeDisponivel(e.nome,data));
   const c=(cid||'').toUpperCase().trim();
   return eqs.filter(e=>{
-    // Corrigido: usando a variável EQUIPES que já existe no arquivo
-    const r=EQUIPES[e.nome]; 
+    const r=EQUIPES[e.nome];
     if(!r) return true;
     if(r.tipos && r.tipos.length > 0 && !r.tipos.includes(tipo)) return false;
     if(c && r.cidades && r.cidades.length > 0 && !r.cidades.includes(c)) return false;
@@ -1143,17 +1257,114 @@ function sugerirEquipe(reg,tipo,cid,isMT,isBT0,data){
     return true;
   });
 }
+
+// Retorna quantidade de AFs (demanda importada + agendados) de uma equipe em uma data
+function getAfNoDia(equipe, data){
+  if(!equipe||!data) return 0;
+  const dAF = demandaAF.filter(a=>a.equipe===equipe&&a.data===data).length;
+  const aAF = agend.filter(a=>a.equipe===equipe&&a.data===data&&a.tipo==='AF').length;
+  return dAF + aAF;
+}
+
+// Retorna 'ok' (0-1 AFs), 'warn' (2 AFs) ou 'full' (3+ AFs)
+function getAfCapStatus(equipe, data){
+  const n = getAfNoDia(equipe, data);
+  if(n >= 3) return {status:'full', count:n};
+  if(n === 2) return {status:'warn', count:n};
+  return {status:'ok', count:n};
+}
+
 function getConflitos(eq,d,p){if(!eq||!d||!p)return[];const np=normPer(p);return agend.filter(a=>a.equipe===eq&&a.data===d&&normPer(a.periodo)===np);}
 function getProximaDataLivre(eq,di,p){const np=normPer(p),oc=new Set(agend.filter(a=>a.equipe===eq&&normPer(a.periodo)===np).map(a=>a.data)),d=new Date(di);for(let i=1;i<=30;i++){d.setDate(d.getDate()+1);const ds=dataLocal(d);if(!oc.has(ds)&&!isFeriado(ds))return ds;}return null;}
-function getEquipesLivres(reg,tipo,cid,d,p,isMT,isBT0){const np=normPer(p),oc=new Set(agend.filter(a=>a.data===d&&normPer(a.periodo)===np).map(a=>a.equipe));return sugerirEquipe(reg,tipo,cid,isMT,isBT0).filter(e=>!oc.has(e.nome));}
-function checkConflito(){const eq=document.getElementById('s-equipe')?.value||'',d=document.getElementById('s-data')?.value||'',p=document.getElementById('s-periodo')?.value||'',reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',cid=document.getElementById('s-cidade')?.value||'',box=document.getElementById('conflito-box');if(!box)return;if(!eq||!d||!p){box.innerHTML='';return;}const cf=getConflitos(eq,d,p);if(!cf.length){box.innerHTML=`<div class="hint hint-ok">✓ ${eq} está livre.</div>`;setTimeout(()=>{if(box.querySelector('.hint-ok'))box.innerHTML='';},3500);return;}const c=cf[0];let sg='';const px=getProximaDataLivre(eq,d,p);if(px)sg+=`<div class="sugg-section"><div class="sugg-row"><div class="sugg-label">Próxima livre:</div><button class="btn-sugg" onclick="aplicarData('${px}')">${fmtD(px)} ${p}</button></div></div>`;const lv=getEquipesLivres(reg,tipo,cid,d,p,formState.isMT,formState.isBT0);if(lv.length)sg+=`<div class="sugg-section"><div class="sugg-row"><div class="sugg-label">Equipes livres:</div>${lv.slice(0,3).map(e=>`<button class="btn-sugg" onclick="aplicarEquipe('${e.nome}')">${e.nome}</button>`).join('')}</div></div>`;box.innerHTML=`<div class="conflict-wrap"><div class="conflict-title">⚠️ Conflito</div><div class="conflict-item"><b>${eq}</b> já possui:</div><div class="conflict-item" style="margin-top:6px;background:#fff;padding:6px 8px;border-radius:6px;border:1px solid rgba(186,117,23,.2)">${tipoBadge(c.tipo)} <b>${c.cidade}</b> <span style="color:var(--text2)">${c.obs}</span></div>${sg}</div>`;}
+
+function getEquipesLivres(reg,tipo,cid,d,p,isMT,isBT0){
+  const np=normPer(p);
+  const oc=new Set(agend.filter(a=>a.data===d&&normPer(a.periodo)===np).map(a=>a.equipe));
+  return sugerirEquipe(reg,tipo,cid,isMT,isBT0)
+    .filter(e=>!oc.has(e.nome))
+    .filter(e=>{
+      if(!d) return true;
+      const af=getAfNoDia(e.nome, d);
+      return af < 3; 
+    })
+    .map(e=>{
+      const af=d?getAfNoDia(e.nome, d):0;
+      return {...e, afNoDia:af, afWarn: af===2};
+    });
+}
+function checkConflito(){
+  const eq=document.getElementById('s-equipe')?.value||'';
+  const d=document.getElementById('s-data')?.value||'';
+  const p=document.getElementById('s-periodo')?.value||'';
+  const reg=document.getElementById('s-reg')?.value||'';
+  const tipo=document.getElementById('s-tipo')?.value||'';
+  const cid=document.getElementById('s-cidade')?.value||'';
+  const box=document.getElementById('conflito-box');
+  const afBox=document.getElementById('af-capacity-box');
+  if(!box)return;
+
+  if(afBox && d && reg){
+    const eqsReg = getEquipesByReg(reg);
+    if(eqsReg.length){
+      const rows = eqsReg.map(e=>{
+        const cap=getAfCapStatus(e.nome, d);
+        const icons={ok:'✅',warn:'⚠️',full:'🚫'};
+        const labels={ok:'Disponível',warn:'Atenção (2 AFs)',full:'Saturada (3+ AFs)'};
+        return `<div class="af-cap-row ${cap.status}"><span>${e.nome}</span><span class="af-cap-badge">${icons[cap.status]} ${cap.count} AF${cap.count!==1?'s':''} — ${labels[cap.status]}</span></div>`;
+      }).join('');
+      afBox.innerHTML=`<div class="af-cap-box"><div class="af-cap-title">📊 Carga AF das equipes em ${fmtD(d)}</div>${rows}</div>`;
+    } else { afBox.innerHTML=''; }
+  } else if(afBox){ afBox.innerHTML=''; }
+
+  if(eq && d){
+    const afStatus=getAfCapStatus(eq, d);
+    if(afStatus.status==='full'){
+      box.innerHTML=`<div class="conflict-wrap"><div class="conflict-title">🚫 Equipe Saturada</div><div class="conflict-item">${eq} já possui <b>${afStatus.count} AFs</b> neste dia — não pode receber mais agendamentos.</div></div>`;
+      return;
+    } else if(afStatus.status==='warn'){
+      box.innerHTML=`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;font-size:12px;color:#92400e;margin-top:4px">⚠️ ${eq} possui <b>${afStatus.count} AFs</b> hoje — capacidade reduzida, verifique com o programador.</div>`;
+    }
+  }
+
+  if(!eq||!d||!p){if(!eq||!d){}else box.innerHTML='';return;}
+  const cf=getConflitos(eq,d,p);
+  if(!cf.length){
+    const afStatus=eq&&d?getAfCapStatus(eq,d):{status:'ok'};
+    if(afStatus.status==='ok'){
+      box.innerHTML=`<div class="hint hint-ok">✓ ${eq} está livre.</div>`;
+      setTimeout(()=>{if(box.querySelector('.hint-ok'))box.innerHTML='';},3500);
+    }
+    return;
+  }
+  const c=cf[0];
+  let sg='';
+  const px=getProximaDataLivre(eq,d,p);
+  if(px)sg+=`<div class="sugg-section"><div class="sugg-row"><div class="sugg-label">Próxima livre:</div><button class="btn-sugg" onclick="aplicarData('${px}')">${fmtD(px)} ${p}</button></div></div>`;
+  const lv=getEquipesLivres(reg,tipo,cid,d,p,formState.isMT,formState.isBT0);
+  if(lv.length)sg+=`<div class="sugg-section"><div class="sugg-row"><div class="sugg-label">Equipes livres:</div>${lv.slice(0,3).map(e=>`<button class="btn-sugg" onclick="aplicarEquipe('${e.nome}')">${e.nome}${e.afWarn?' ⚠️':''}</button>`).join('')}</div></div>`;
+  box.innerHTML=`<div class="conflict-wrap"><div class="conflict-title">⚠️ Conflito de Horário</div><div class="conflict-item"><b>${eq}</b> já possui:</div><div class="conflict-item" style="margin-top:6px;background:#fff;padding:6px 8px;border-radius:6px;border:1px solid rgba(186,117,23,.2)">${tipoBadge(c.tipo)} <b>${c.cidade}</b> <span style="color:var(--text2)">${c.obs}</span></div>${sg}</div>`;
+}
 function aplicarData(d){document.getElementById('s-data').value=d;onDataChange();checkConflito();toast('Data atualizada!');}
 function aplicarEquipe(eq){document.getElementById('s-equipe').value=eq;checkConflito();toast('Equipe alterada!');}
 function calcTempoEstimado(t,o){const u=(o||'').toLowerCase(),tc=u.includes('troca de tc')||u.includes('troca tc');if(t==='MD'&&tc)return'⏱ 4h30';if(t==='AF'&&tc)return'⏱ 2h';if(t==='LN')return'⏱ 4h';if(t==='VE')return'⏱ 40 min';if(t==='LE')return'⏱ 1h';if(t==='II')return'⏱ 1h30';if(t==='AF')return'⏱ 1h';return null;}
 function atualizarTempoEstimado(){const r=calcTempoEstimado(document.getElementById('s-tipo')?.value,document.getElementById('s-obs')?.value);document.getElementById('tempo-estimado').innerHTML=r?`<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:#e6f2fc;border:1px solid #bfdbfe;border-radius:8px;font-size:12px;color:#1e40af;margin-top:5px"><strong>${r}</strong></div>`:'';}
 function setToggle(k,v){formState[k==='mt'?'isMT':'isBT0']=v;if(k==='mt'){document.getElementById('mt-sim').className='toggle-opt'+(v?' sel-on':'');document.getElementById('mt-nao').className='toggle-opt'+(!v?' sel-nao':'');document.getElementById('mt-hint').innerHTML=v?'<div class="hint hint-in">ℹ️ Apenas equipes MT.</div>':'';}if(k==='bt0'){document.getElementById('bt0-sim').className='toggle-opt'+(v?' sel-on':'');document.getElementById('bt0-nao').className='toggle-opt'+(!v?' sel-nao':'');document.getElementById('bt0-hint').innerHTML=v?'<div class="hint hint-wn">⚠️ Apenas equipes com BT0.</div>':'';}updateEquipeOptions();renderRegras();}
 function setNsStatus(s){formState.nsStatus=formState.nsStatus===s?null:s;['IMP','REAG','REPR','REJE'].forEach(x=>{const el=document.getElementById('ns-'+x);if(el)el.className='ns-opt'+(formState.nsStatus===x?` sel-${x}`:'');});const h=document.getElementById('ns-hint');if(!h)return;const m={IMP:'<div class="hint hint-er">📥 IMP — Importada</div>',REAG:'<div class="hint hint-wn">📅 REAG — Reagendada</div>',REPR:'<div class="hint hint-pu">🔄 REPR — Reprogramada</div>',REJE:'<div class="hint" style="background:#f3f4f6;color:#374151">❌ REJE — Rejeitada</div>'};h.innerHTML=formState.nsStatus?m[formState.nsStatus]:'';}
-function setContato(v){formState.contato=v;document.getElementById('opt-sim').className='toggle-opt'+(v?' sel-sim':'');document.getElementById('opt-nao').className='toggle-opt'+(!v?' sel-nao':'');if(typeof sugerirMelhorDataIA==='function')sugerirMelhorDataIA();}
+function setContato(v){
+  formState.contato=v;
+  document.getElementById('opt-sim').className='toggle-opt'+(v?' sel-sim':'');
+  document.getElementById('opt-nao').className='toggle-opt'+(!v?' sel-nao':'');
+  const wrap=document.getElementById('contato-cliente-wrap');
+  if(wrap){
+    if(!v){
+      wrap.classList.add('show');
+      document.getElementById('s-contato-cliente').focus();
+    } else {
+      wrap.classList.remove('show');
+    }
+  }
+  if(typeof sugerirMelhorDataIA==='function')sugerirMelhorDataIA();
+}
 
 function renderRegras(){const reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',el=document.getElementById('regras-panel');if(!el)return;if(!reg&&!tipo){el.innerHTML='<div class="empty">Selecione regional e tipo</div>';return;}const eqs=sugerirEquipe(reg,tipo,'',formState.isMT,formState.isBT0);if(!eqs.length){el.innerHTML='<div class="empty">Nenhuma equipe.</div>';return;}el.innerHTML=`<div style="font-size:11px;color:var(--text2);margin-bottom:8px">${eqs.length} equipe(s):</div>`+eqs.map(e=>`<div class="team-card"><div class="team-header"><div class="av">${e.nome.slice(-2)}</div><div style="flex:1"><div class="tn">${e.nome}</div><div class="ts">${e.spec}</div></div><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">${e.aceitaMT?'<span style="font-size:10px;background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:4px;font-weight:700">MT✓</span>':''}${e.aceitaBT0?'<span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:4px;font-weight:700">BT0✓</span>':''}</div></div>${e.cidades.length?`<div style="font-size:11px;color:var(--text2);margin-top:3px">📍 ${e.cidades.join(', ')}</div>`:''}${e.obs?`<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic">${e.obs}</div>`:''}</div>`).join('');const fp=document.getElementById('feriados-panel');if(!fp)return;const hj=new Date(),pf=[];for(let i=0;i<=60;i++){const d=new Date(hj);d.setDate(d.getDate()+i);const ds=dataLocal(d),f=isFeriado(ds);if(f&&f.tipo!=='Fim de semana')pf.push({data:ds,f});if(pf.length>=4)break;}fp.innerHTML=pf.length?`<div class="sec">próximos feriados</div>`+pf.map(({data,f})=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--erl);border-radius:8px;margin-bottom:5px"><div style="font-size:12px;font-weight:600;color:var(--erd)">${fmtD(data)}</div><div style="font-size:11px;color:var(--erd)">${f.nome}</div></div>`).join(''):'';}
 function onRegChange(){updateEquipeOptions();renderRegras();}
@@ -1169,7 +1380,43 @@ function renderDatas(){const reg=document.getElementById('d-reg')?.value||'',el=
 
 function renderEquipes(){const reg=document.getElementById('e-reg')?.value||'',dt=document.getElementById('e-data')?.value,el=document.getElementById('list-equipes');if(!el)return;if(!reg){el.innerHTML='<div class="empty">Selecione</div>';return;}let eqs=getEquipesByReg(reg);if(dt){const ho=agend.filter(a=>a.regional===reg&&a.data===dt);eqs=eqs.map(e=>{const dq=ho.filter(x=>x.equipe===e.nome);return{...e,ocup:dq.length,agends:dq};});}el.innerHTML=eqs.map(e=>`<div class="team-card"><div class="team-header"><div class="av">${e.nome.slice(-2)}</div><div style="flex:1"><div class="tn">${e.nome}</div><div class="ts">${e.spec}</div></div>${dt?`<div style="font-size:11px;font-weight:600;color:${e.ocup>0?'var(--wnd)':'var(--okd)'};background:${e.ocup>0?'var(--wnl)':'var(--okl)'};padding:3px 8px;border-radius:6px">${e.ocup}</div>`:''}</div>${dt&&e.agends&&e.agends.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${e.agends.map(a=>`<div style="font-size:11px;color:var(--text2);margin-bottom:3px;display:flex;justify-content:space-between"><span>${tipoBadge(a.tipo)} ${a.cidade}</span><span style="font-weight:600">${a.periodo}</span></div>`).join('')}</div>`:''}</div>`).join('');}
 
-function updateEquipeOptions(){const reg=document.getElementById('s-reg')?.value||'',tipo=document.getElementById('s-tipo')?.value||'',cid=document.getElementById('s-cidade')?.value||'',el=document.getElementById('s-equipe'),h=document.getElementById('equipe-hint');if(!el||!h)return;const data=document.getElementById('s-data')?.value;const periodo=document.getElementById('s-periodo')?.value||'09h';const sg=getEquipesLivres(reg,tipo,cid,data,periodo,formState.isMT,formState.isBT0);if(!reg||!tipo){el.innerHTML='<option value="">— automático —</option>';h.innerHTML='';checkConflito();return;}if(!sg.length){el.innerHTML='<option value="">Nenhuma equipe livre neste período</option>';h.innerHTML=`<div class="hint hint-wn">⚠️ Nenhuma equipe livre.</div>`;}else{const pv=el.value;el.innerHTML='<option value="">— automático —</option>'+sg.map(e=>`<option value="${e.nome}">${e.nome} — ${e.spec}</option>`).join('');if(sg.find(x=>x.nome===pv)){el.value=pv;}else{el.value='';}h.innerHTML=`<div class="hint hint-ok">✓ ${sg.length} equipe(s) livre(s).</div>`;}checkConflito();sugerirMelhorDataIA();}
+function updateEquipeOptions(){
+  const reg=document.getElementById('s-reg')?.value||'';
+  const tipo=document.getElementById('s-tipo')?.value||'';
+  const cid=document.getElementById('s-cidade')?.value||'';
+  const el=document.getElementById('s-equipe');
+  const h=document.getElementById('equipe-hint');
+  if(!el||!h)return;
+  const data=document.getElementById('s-data')?.value;
+  const periodo=document.getElementById('s-periodo')?.value||'09h';
+  const sg=getEquipesLivres(reg,tipo,cid,data,periodo,formState.isMT,formState.isBT0);
+  if(!reg||!tipo){
+    el.innerHTML='<option value="">— automático —</option>';
+    h.innerHTML='';
+    checkConflito();
+    return;
+  }
+  // Verificar se existem equipes que foram excluídas por saturação AF
+  const todasEquipes=sugerirEquipe(reg,tipo,cid,formState.isMT,formState.isBT0);
+  const saturadas=data?todasEquipes.filter(e=>getAfNoDia(e.nome,data)>=3):[];
+  if(!sg.length){
+    const msgSat=saturadas.length?` (${saturadas.length} saturada${saturadas.length>1?'s':''} de AF)`:''; 
+    el.innerHTML='<option value="">Nenhuma equipe disponível neste período</option>';
+    h.innerHTML=`<div class="hint hint-wn">⚠️ Nenhuma equipe livre${msgSat}.</div>`;
+  } else {
+    const pv=el.value;
+    el.innerHTML='<option value="">— automático —</option>'+sg.map(e=>{
+      const afLabel=e.afNoDia===2?` ⚠️ (2 AFs)`:(e.afNoDia>0?` (${e.afNoDia} AF)`:''  );
+      return `<option value="${e.nome}">${e.nome} — ${e.spec}${afLabel}</option>`;
+    }).join('');
+    if(sg.find(x=>x.nome===pv)){el.value=pv;}else{el.value='';}
+    let hint=`<div class="hint hint-ok">✓ ${sg.length} equipe(s) disponível(is).</div>`;
+    if(saturadas.length) hint+=`<div class="hint hint-wn" style="margin-top:4px">🚫 ${saturadas.length} equipe(s) bloqueada(s) por saturação de AF.</div>`;
+    h.innerHTML=hint;
+  }
+  checkConflito();
+  sugerirMelhorDataIA();
+}
 
 function onDataChange(){const d=document.getElementById('s-data')?.value||'';const venc=document.getElementById('s-vencimento')?.value||'';const box=document.getElementById('holiday-box'),bs=document.getElementById('leitura-banner-sol');if(!box)return;if(d&&venc&&d===venc){document.getElementById('s-data').value='';box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 Data Inválida</div><div style="font-size:12px;color:var(--erd)">Não é possível agendar no dia do vencimento.</div></div>`;if(bs)bs.classList.remove('show');updateEquipeOptions();return;}if(!d){box.innerHTML='';if(bs)bs.classList.remove('show');updateEquipeOptions();return;}const f=isFeriado(d);if(f){box.innerHTML=`<div class="holiday-warn"><div class="holiday-warn-title">🚫 ${f.tipo==='Fim de semana'?'Fim de semana':'Feriado'}</div><div style="font-size:12px;color:var(--erd)">${f.nome}</div></div>`;if(bs)bs.classList.remove('show');}else{box.innerHTML='';if(bs){if(isPeriodoLeitura(d))bs.classList.add('show');else bs.classList.remove('show');}updateEquipeOptions();}}
 function onVencimentoChange(){const venc=document.getElementById('s-vencimento').value;const data=document.getElementById('s-data').value;if(venc&&data&&venc===data){document.getElementById('s-data').value='';toast('Não é possível agendar no dia do vencimento');onDataChange();}if(typeof sugerirMelhorDataIA==='function')sugerirMelhorDataIA();}
@@ -1235,11 +1482,17 @@ function sugerirMelhorDataIA(){
     if(eqsParaData.length === 0) continue;
 
     for(const eq of eqsParaData){
+      // Pular equipes saturadas de AF (3+)
+      const afStatus=getAfCapStatus(eq.nome, ds);
+      if(afStatus.status==='full') continue;
+
       const minAgend=agend.filter(a=>a.equipe===eq.nome&&a.data===ds).reduce((s,a)=>s+(DURACOES[a.tipo]||45),0);
       const minDemanda=demandaAF.filter(a=>a.equipe===eq.nome&&a.data===ds).reduce((s,a)=>s+(DURACOES[a.tipo]||45),0);
       const ocupTotal=minAgend+minDemanda;
+      // Penalizar levemente equipes com 2 AFs (warn) na pontuação da IA
+      const ocupAjustado = afStatus.status==='warn' ? ocupTotal + 60 : ocupTotal;
       if(ocupTotal+tempoSolicitado <= CAPACIDADE_DIARIA){
-        if(ocupTotal < menorOcupacao){ menorOcupacao=ocupTotal; melhorData=ds; melhorEquipe=eq.nome; }
+        if(ocupAjustado < menorOcupacao){ menorOcupacao=ocupAjustado; melhorData=ds; melhorEquipe=eq.nome; }
       }
     }
   }
@@ -1260,12 +1513,96 @@ function sugerirMelhorDataIA(){
 
 window.aplicarSugestaoIA=function(data,equipe){document.getElementById('s-data').value=data;if(equipe){const sel=document.getElementById('s-equipe');let hasEq=false;for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===equipe)hasEq=true;}if(hasEq)sel.value=equipe;}onDataChange();checkConflito();toast('Sugestão aplicada!');}
 
-async function enviarSol(){const reg=document.getElementById('s-reg').value,tipo=document.getElementById('s-tipo').value,data=document.getElementById('s-data').value,cid=document.getElementById('s-cidade').value,obs=document.getElementById('s-obs').value,per=document.getElementById('s-periodo').value,venc=document.getElementById('s-vencimento').value,lnBt=document.getElementById('s-ln-bt').checked,lnNotaBt=document.getElementById('s-ln-nota-bt').value;if(!reg||!tipo||!data||!cid||!obs||!per||!venc){toast('Preencha obrigatórios (*)');return;}if(tipo==='LN'&&normPer(per)!=='09h'){toast('⏰ Notas LN só podem ser agendadas no período 09h!');return;}if(tipo==='LN'&&lnBt&&!lnNotaBt){toast('Informe a nota BT');return;}if(data===venc){toast('Não é possível agendar no dia do vencimento');return;}if(isFeriado(data,cid)){toast('Não é possível agendar neste dia (Feriado)');return;}if(!currentUser)return;solicitacoes.push({id:Date.now(),regional:reg,nota:document.getElementById('s-nota').value,vencimento:venc,cliente:document.getElementById('s-cliente').value,tipo,obs,data,periodo:normPer(per),cidade:cid.toUpperCase(),equipe:document.getElementById('s-equipe').value,analista:currentUser.name,analista_email:currentUser.email,contato:formState.contato,isMT:formState.isMT,isBT0:formState.isBT0,nsStatus:formState.nsStatus||'',status:'pendente',devolutiva:'',msg_devolutiva:'',ts:new Date().toISOString(),comentario:document.getElementById('s-comentario').value,acompanhaBT:lnBt,notaBT:lnNotaBt});save();limparSol();toast('Enviada!');}
+async function enviarSol(){
+  const reg=document.getElementById('s-reg').value;
+  const tipo=document.getElementById('s-tipo').value;
+  const data=document.getElementById('s-data').value;
+  const cid=document.getElementById('s-cidade').value;
+  const obs=document.getElementById('s-obs').value;
+  const per=document.getElementById('s-periodo').value;
+  const venc=document.getElementById('s-vencimento').value;
+  const lnBt=document.getElementById('s-ln-bt').checked;
+  const lnNotaBt=document.getElementById('s-ln-nota-bt').value;
+  const contatoCliente=(document.getElementById('s-contato-cliente')?.value||'').trim();
+  if(!reg||!tipo||!data||!cid||!obs||!per||!venc){toast('Preencha obrigatórios (*)');return;}
+  // Validação: contato obrigatório quando NÃO houve contato com cliente
+  if(formState.contato===false && !contatoCliente){
+    toast('📞 Informe o contato do cliente (obrigatório quando não houve contato).');
+    document.getElementById('s-contato-cliente').focus();
+    document.getElementById('s-contato-cliente').style.animation='shake 0.4s ease';
+    setTimeout(()=>document.getElementById('s-contato-cliente').style.animation='',400);
+    return;
+  }
+  if(tipo==='LN'&&normPer(per)!=='09h'){toast('⏰ Notas LN só podem ser agendadas no período 09h!');return;}
+  if(tipo==='LN'&&lnBt&&!lnNotaBt){toast('Informe a nota BT');return;}
+  if(data===venc){toast('Não é possível agendar no dia do vencimento');return;}
+  if(isFeriado(data,cid)){toast('Não é possível agendar neste dia (Feriado)');return;}
+  // Validação: bloquear agendamento se equipe selecionada estiver saturada de AF
+  const eqSel=document.getElementById('s-equipe').value;
+  if(eqSel && data){
+    const afStatus=getAfCapStatus(eqSel, data);
+    if(afStatus.status==='full'){
+      toast(`🚫 ${eqSel} está saturada (${afStatus.count} AFs) — escolha outra equipe ou data.`);
+      return;
+    }
+  }
+  if(!currentUser)return;
+  solicitacoes.push({
+    id:Date.now(),
+    regional:reg,
+    nota:document.getElementById('s-nota').value,
+    vencimento:venc,
+    cliente:document.getElementById('s-cliente').value,
+    tipo,obs,data,
+    periodo:normPer(per),
+    cidade:cid.toUpperCase(),
+    equipe:eqSel,
+    analista:currentUser.name,
+    analista_email:currentUser.email,
+    contato:formState.contato,
+    contatoCliente: formState.contato===false ? contatoCliente : '',
+    isMT:formState.isMT,
+    isBT0:formState.isBT0,
+    nsStatus:formState.nsStatus||'',
+    status:'pendente',
+    devolutiva:'',
+    msg_devolutiva:'',
+    ts:new Date().toISOString(),
+    comentario:document.getElementById('s-comentario').value,
+    acompanhaBT:lnBt,
+    notaBT:lnNotaBt
+  });
+  save();
+  limparSol();
+  toast('Solicitação enviada! ✅');
+}
 
-function limparSol(){['s-reg','s-tipo','s-periodo','s-equipe'].forEach(id=>{const s=document.getElementById(id);if(s)s.value='';});['s-nota','s-data','s-cidade','s-obs','s-cliente','s-comentario','s-vencimento'].forEach(id=>{const s=document.getElementById(id);if(s)s.value='';});// Re-enable all period options (may have been disabled by LN);
-Array.from(document.getElementById('s-periodo').options).forEach(o=>o.disabled=false);const wEl=document.getElementById('ln-periodo-warn');if(wEl)wEl.style.display='none';document.getElementById('holiday-box').innerHTML='';document.getElementById('conflito-box').innerHTML='';document.getElementById('tempo-estimado').innerHTML='';document.getElementById('equipe-hint').innerHTML='';const aiBox=document.getElementById('ai-sugg-box');if(aiBox)aiBox.innerHTML='';formState={contato:true,isMT:false,isBT0:false,nsStatus:null};setContato(true);setToggle('mt',false);setToggle('bt0',false);setNsStatus(null);}
+function limparSol(){
+  ['s-reg','s-tipo','s-periodo','s-equipe'].forEach(id=>{const s=document.getElementById(id);if(s)s.value='';});
+  ['s-nota','s-data','s-cidade','s-obs','s-cliente','s-comentario','s-vencimento'].forEach(id=>{const s=document.getElementById(id);if(s)s.value='';});
+  // Limpar campo de contato do cliente
+  const cc=document.getElementById('s-contato-cliente');
+  if(cc){cc.value='';cc.classList.remove('valid');}
+  // Re-enable all period options (may have been disabled by LN)
+  Array.from(document.getElementById('s-periodo').options).forEach(o=>o.disabled=false);
+  const wEl=document.getElementById('ln-periodo-warn');
+  if(wEl)wEl.style.display='none';
+  document.getElementById('holiday-box').innerHTML='';
+  document.getElementById('conflito-box').innerHTML='';
+  document.getElementById('tempo-estimado').innerHTML='';
+  document.getElementById('equipe-hint').innerHTML='';
+  const aiBox=document.getElementById('ai-sugg-box');
+  if(aiBox)aiBox.innerHTML='';
+  const afBox=document.getElementById('af-capacity-box');
+  if(afBox)afBox.innerHTML='';
+  formState={contato:true,isMT:false,isBT0:false,nsStatus:null};
+  setContato(true);
+  setToggle('mt',false);
+  setToggle('bt0',false);
+  setNsStatus(null);
+}
 
-function renderSols(){const el=document.getElementById('list-sols');if(!el)return;const f=document.getElementById('sol-filtro')?.value||'';const list=f?solicitacoes.filter(x=>x.status===f):solicitacoes;if(!list.length){el.innerHTML='<div class="empty">Nenhuma</div>';return;}el.innerHTML=[...list].reverse().map(s=>{const i=solicitacoes.findIndex(x=>x.id===s.id);return`<div class="sol-item ${s.status}"><div class="sol-header"><div style="flex:1"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="badge b-navy">${s.regional}</span>${tipoBadge(s.tipo)}${s.isMT?'<span class="badge b-info" style="font-size:10px">MT</span>':''}${s.isBT0?'<span class="badge b-ok" style="font-size:10px">BT0</span>':''}${s.nsStatus?nsBadge(s.nsStatus):''}<span style="font-size:13px;font-weight:600">${s.cidade} — ${fmtD(s.data)} ${s.periodo}</span></div><div style="font-size:12px"><div><b>Analista:</b> ${s.analista}</div><div><b>Nota:</b> ${s.nota||'—'} | <b>Vencimento:</b> ${s.vencimento?fmtD(s.vencimento):'—'} | <b>Cliente:</b> ${s.cliente||'—'}</div><div><b>Serviço:</b> ${s.obs}</div><div><b>Equipe:</b> <span style="color:var(--blue);font-weight:600">${s.equipe||'Nenhuma'}</span></div>${s.comentario?`<div style="margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)"><i>${escHtml(s.comentario)}</i></div>`:''}</div></div><div class="sol-actions">${s.status==='pendente'?`<button class="btn btn-sm btn-g" onclick="confirmarDev(${i})">Confirmar</button><button class="btn btn-sm" style="color:var(--wn);border-color:var(--wn)" onclick="document.getElementById('dev-${s.id}').classList.toggle('show')">Reagendar</button>`:`<span class="badge ${s.status==='confirmado'?'b-ok':'b-wn'}">${s.status.toUpperCase()}</span>`}<button class="btn btn-sm" style="color:var(--er);margin-top:10px" onclick="excluirSol(${i})">Excluir</button></div></div><div class="dev-box" id="dev-${s.id}"><textarea id="dmsg-${s.id}" placeholder="Motivo..." style="width:100%;min-height:60px;margin-bottom:8px"></textarea><button class="btn btn-p btn-sm" onclick="enviarDev(${i})">Enviar</button></div></div>`;}).join('');}
+function renderSols(){const el=document.getElementById('list-sols');if(!el)return;const f=document.getElementById('sol-filtro')?.value||'';const list=f?solicitacoes.filter(x=>x.status===f):solicitacoes;if(!list.length){el.innerHTML='<div class="empty">Nenhuma</div>';return;}el.innerHTML=[...list].reverse().map(s=>{const i=solicitacoes.findIndex(x=>x.id===s.id);const contatoBadge=s.contato===false?`<span style="background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;border-radius:5px;font-size:10px;padding:1px 6px;font-weight:700">📵 Sem contato${s.contatoCliente?': '+escHtml(s.contatoCliente):''}</span>`:'<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:5px;font-size:10px;padding:1px 6px;font-weight:700">📞 Contato feito</span>';return`<div class="sol-item ${s.status}"><div class="sol-header"><div style="flex:1"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="badge b-navy">${s.regional}</span>${tipoBadge(s.tipo)}${s.isMT?'<span class="badge b-info" style="font-size:10px">MT</span>':''}${s.isBT0?'<span class="badge b-ok" style="font-size:10px">BT0</span>':''}${s.nsStatus?nsBadge(s.nsStatus):''}<span style="font-size:13px;font-weight:600">${s.cidade} — ${fmtD(s.data)} ${s.periodo}</span></div><div style="font-size:12px"><div><b>Analista:</b> ${s.analista} ${contatoBadge}</div><div><b>Nota:</b> ${s.nota||'—'} | <b>Vencimento:</b> ${s.vencimento?fmtD(s.vencimento):'—'} | <b>Cliente:</b> ${s.cliente||'—'}</div><div><b>Serviço:</b> ${s.obs}</div><div><b>Equipe:</b> <span style="color:var(--blue);font-weight:600">${s.equipe||'— automática —'}</span></div>${s.comentario?`<div style="margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)"><i>${escHtml(s.comentario)}</i></div>`:''}</div></div><div class="sol-actions">${s.status==='pendente'?`<button class="btn btn-sm btn-g" onclick="confirmarDev(${i})">Confirmar</button><button class="btn btn-sm" style="color:var(--wn);border-color:var(--wn)" onclick="document.getElementById('dev-${s.id}').classList.toggle('show')">Reagendar</button>`:`<span class="badge ${s.status==='confirmado'?'b-ok':'b-wn'}">${s.status.toUpperCase()}</span>`}<button class="btn btn-sm" style="color:var(--er);margin-top:10px" onclick="excluirSol(${i})">Excluir</button></div></div><div class="dev-box" id="dev-${s.id}"><textarea id="dmsg-${s.id}" placeholder="Motivo..." style="width:100%;min-height:60px;margin-bottom:8px"></textarea><button class="btn btn-p btn-sm" onclick="enviarDev(${i})">Enviar</button></div></div>`;}).join('');}
 
 async function confirmarDev(i){const s=solicitacoes[i];solicitacoes[i]={...s,status:'confirmado',devolutiva:'confirmado',msg_devolutiva:'OK'};agend.push({id:Date.now(),regional:s.regional,nota:s.nota||'',vencimento:s.vencimento||'',cliente:s.cliente||'',tipo:s.tipo,obs:s.obs,data:s.data,periodo:s.periodo,cidade:s.cidade,confirmado:'SIM',equipe:s.equipe||'',isMT:s.isMT||false,isBT0:s.isBT0||false,nsStatus:s.nsStatus||'',isProgramado:false});save();toast('Confirmado!');notifyUser("Nota Confirmada! ✅", `A nota ${s.nota} para ${s.cidade} foi confirmada.`);}
 async function enviarDev(i){const s=solicitacoes[i],msg=document.getElementById(`dmsg-${s.id}`).value;if(!msg){toast('Preencha devolutiva');return;}solicitacoes[i]={...s,status:'reagendar',devolutiva:'reagendar',msg_devolutiva:msg};save();toast('Enviada!');}
